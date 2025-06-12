@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
@@ -26,7 +25,7 @@ export const usePedidos = () => {
       // Convertir los datos de la DB al tipo Pedido
       return data.map(item => ({
         ...item,
-        productos: item.productos as Producto[]
+        productos: item.productos as unknown as Producto[]
       })) as Pedido[];
     },
   });
