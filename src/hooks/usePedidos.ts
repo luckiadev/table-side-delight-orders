@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Pedido, NuevoPedido } from '@/types/pedido';
+import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
 import { toast } from '@/hooks/use-toast';
 
 export const usePedidos = () => {
@@ -23,7 +23,11 @@ export const usePedidos = () => {
       }
       
       console.log('Pedidos fetched:', data);
-      return data as Pedido[];
+      // Convertir los datos de la DB al tipo Pedido
+      return data.map(item => ({
+        ...item,
+        productos: item.productos as Producto[]
+      })) as Pedido[];
     },
   });
 
@@ -33,7 +37,11 @@ export const usePedidos = () => {
       console.log('Creating pedido:', nuevoPedido);
       const { data, error } = await supabase
         .from('pedidos_casino')
-        .insert([nuevoPedido])
+        .insert([{
+          numero_mesa: nuevoPedido.numero_mesa,
+          productos: nuevoPedido.productos as any,
+          total: nuevoPedido.total
+        }])
         .select()
         .single();
 
@@ -109,7 +117,8 @@ export const usePedidos = () => {
     isLoading,
     error,
     crearPedido: crearPedidoMutation.mutate,
-    actualizarEstado: actualizarEstadoMutation.mutate,
+    actualizarEstado: (id: string, estado: Pedido['estado']) => 
+      actualizarEstadoMutation.mutate({ id, estado }),
     isCreating: crearPedidoMutation.isPending,
     isUpdating: actualizarEstadoMutation.isPending,
   };

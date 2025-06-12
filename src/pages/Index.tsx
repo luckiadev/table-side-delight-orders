@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -83,6 +82,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold">Sistema de Pedidos Casino</h1>
         <p className="text-gray-600">Gestión completa de pedidos para mesas del casino</p>
