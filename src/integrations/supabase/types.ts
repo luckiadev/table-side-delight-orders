@@ -9,7 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      pedidos_casino: {
+        Row: {
+          created_at: string
+          estado: string
+          fecha_entregado: string | null
+          fecha_pedido: string
+          id: string
+          numero_mesa: number
+          productos: Json
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: string
+          fecha_entregado?: string | null
+          fecha_pedido?: string
+          id?: string
+          numero_mesa: number
+          productos: Json
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: string
+          fecha_entregado?: string | null
+          fecha_pedido?: string
+          id?: string
+          numero_mesa?: number
+          productos?: Json
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
