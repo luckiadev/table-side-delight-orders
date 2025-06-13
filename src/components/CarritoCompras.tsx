@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Producto } from '@/types/pedido';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CarritoComprasProps {
   cart: Producto[];
@@ -14,6 +14,7 @@ interface CarritoComprasProps {
   onRemoveItem: (productId: string) => void;
   onCreateOrder: (numeroMesa: number) => void;
   isCreating: boolean;
+  numeroMesaInicial?: number;
 }
 
 export const CarritoCompras = ({ 
@@ -21,9 +22,16 @@ export const CarritoCompras = ({
   onUpdateQuantity, 
   onRemoveItem, 
   onCreateOrder, 
-  isCreating 
+  isCreating,
+  numeroMesaInicial
 }: CarritoComprasProps) => {
-  const [numeroMesa, setNumeroMesa] = useState<number>(1);
+  const [numeroMesa, setNumeroMesa] = useState<number>(numeroMesaInicial || 1);
+
+  useEffect(() => {
+    if (numeroMesaInicial !== undefined) {
+      setNumeroMesa(numeroMesaInicial);
+    }
+  }, [numeroMesaInicial]);
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -99,7 +107,14 @@ export const CarritoCompras = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="mesa">Número de Mesa (0-500)</Label>
+            <Label htmlFor="mesa">
+              Número de Mesa (0-500)
+              {numeroMesaInicial !== undefined && (
+                <span className="text-sm text-blue-600 font-normal ml-2">
+                  (Pre-configurado)
+                </span>
+              )}
+            </Label>
             <Input
               id="mesa"
               type="number"
@@ -108,6 +123,8 @@ export const CarritoCompras = ({
               value={numeroMesa}
               onChange={(e) => setNumeroMesa(parseInt(e.target.value) || 0)}
               placeholder="Ingrese número de mesa"
+              disabled={numeroMesaInicial !== undefined}
+              className={numeroMesaInicial !== undefined ? "bg-blue-50" : ""}
             />
           </div>
 

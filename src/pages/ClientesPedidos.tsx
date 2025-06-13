@@ -1,15 +1,30 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePedidos } from '@/hooks/usePedidos';
 import { MenuProductos } from '@/components/MenuProductos';
 import { CarritoCompras } from '@/components/CarritoCompras';
 import { Producto } from '@/types/pedido';
 import { ShoppingCart } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 const ClientesPedidos = () => {
   const { crearPedido, isCreating } = usePedidos();
   const [cart, setCart] = useState<Producto[]>([]);
+  const [searchParams] = useSearchParams();
+  
+  // Obtener número de mesa desde la URL
+  const mesaFromUrl = searchParams.get('mesa');
+  const [numeroMesa, setNumeroMesa] = useState<number | undefined>();
+
+  useEffect(() => {
+    if (mesaFromUrl) {
+      const mesa = parseInt(mesaFromUrl);
+      if (!isNaN(mesa) && mesa >= 0 && mesa <= 500) {
+        setNumeroMesa(mesa);
+      }
+    }
+  }, [mesaFromUrl]);
 
   const handleAddToCart = (producto: Producto) => {
     setCart(prev => {
@@ -41,10 +56,10 @@ const ClientesPedidos = () => {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const handleCreateOrder = (numeroMesa: number) => {
+  const handleCreateOrder = (numeroMesaFinal: number) => {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     crearPedido({
-      numero_mesa: numeroMesa,
+      numero_mesa: numeroMesaFinal,
       productos: cart,
       total
     });
@@ -59,6 +74,11 @@ const ClientesPedidos = () => {
           <span>Realizar Pedido</span>
         </h1>
         <p className="text-gray-600">Selecciona tus productos y realiza tu pedido</p>
+        {numeroMesa !== undefined && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 inline-block">
+            <p className="text-blue-800 font-medium">Mesa: {numeroMesa}</p>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -83,6 +103,7 @@ const ClientesPedidos = () => {
             onRemoveItem={handleRemoveItem}
             onCreateOrder={handleCreateOrder}
             isCreating={isCreating}
+            numeroMesaInicial={numeroMesa}
           />
         </div>
       </div>
