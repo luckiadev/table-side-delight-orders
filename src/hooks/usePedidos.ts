@@ -3,18 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
 import { toast } from '@/hooks/use-toast';
 
-export const usePedidos = () => {
+export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   const queryClient = useQueryClient();
 
   // Obtener todos los pedidos
   const { data: pedidos = [], isLoading, error } = useQuery({
-    queryKey: ['pedidos'],
+    queryKey: ['pedidos', fechaInicio, fechaFin],
     queryFn: async () => {
       console.log('Fetching pedidos...');
-      const { data, error } = await supabase
+      let query = supabase
         .from('pedidos_casino')
         .select('*')
         .order('fecha_pedido', { ascending: false });
+
+      // Aplicar filtros de fecha si están definidos
+      if (fechaInicio) {
+        query = query.gte('fecha_pedido', `${fechaInicio}T00:00:00`);
+      }
+      if (fechaFin) {
+        query = query.lte('fecha_pedido', `${fechaFin}T23:59:59`);
+      }
+
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching pedidos:', error);

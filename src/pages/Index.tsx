@@ -1,15 +1,22 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { usePedidos } from '@/hooks/usePedidos';
 import { PedidoCard } from '@/components/PedidoCard';
 import { MenuProductos } from '@/components/MenuProductos';
 import { CarritoCompras } from '@/components/CarritoCompras';
+import { FiltroFechas } from '@/components/FiltroFechas';
 import { Producto } from '@/types/pedido';
-import { ShoppingCart, Clock, CheckCircle, Package } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff } from 'lucide-react';
 
 const Index = () => {
+  const [fechaInicio, setFechaInicio] = useState<string>();
+  const [fechaFin, setFechaFin] = useState<string>();
+  const [mostrarEntregados, setMostrarEntregados] = useState(false);
+  
   const { 
     pedidos, 
     isLoading, 
@@ -17,7 +24,7 @@ const Index = () => {
     actualizarEstado, 
     isCreating, 
     isUpdating 
-  } = usePedidos();
+  } = usePedidos(fechaInicio, fechaFin);
 
   const [cart, setCart] = useState<Producto[]>([]);
 
@@ -59,6 +66,11 @@ const Index = () => {
       total
     });
     setCart([]);
+  };
+
+  const handleFiltroChange = (inicio?: string, fin?: string) => {
+    setFechaInicio(inicio);
+    setFechaFin(fin);
   };
 
   const getEstadisticas = () => {
@@ -143,6 +155,12 @@ const Index = () => {
         </TabsList>
 
         <TabsContent value="pedidos" className="space-y-6">
+          <FiltroFechas
+            onFiltroChange={handleFiltroChange}
+            fechaInicio={fechaInicio}
+            fechaFin={fechaFin}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>Pedidos Activos</CardTitle>
@@ -170,28 +188,49 @@ const Index = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Historial de Pedidos Entregados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pedidos
-                  .filter(pedido => pedido.estado === 'Entregado')
-                  .slice(0, 6)
-                  .map((pedido) => (
-                    <PedidoCard
-                      key={pedido.id}
-                      pedido={pedido}
-                      onUpdateEstado={actualizarEstado}
-                      isUpdating={isUpdating}
-                    />
-                  ))}
+              <div className="flex items-center justify-between">
+                <CardTitle>Historial de Pedidos Entregados</CardTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => setMostrarEntregados(!mostrarEntregados)}
+                  className="flex items-center space-x-2"
+                >
+                  {mostrarEntregados ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      <span>Ocultar</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      <span>Mostrar ({pedidos.filter(p => p.estado === 'Entregado').length})</span>
+                    </>
+                  )}
+                </Button>
               </div>
-              {pedidos.filter(pedido => pedido.estado === 'Entregado').length === 0 && (
-                <p className="text-center text-gray-500 py-8">
-                  No hay pedidos entregados
-                </p>
-              )}
-            </CardContent>
+            </CardHeader>
+            {mostrarEntregados && (
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pedidos
+                    .filter(pedido => pedido.estado === 'Entregado')
+                    .slice(0, 12)
+                    .map((pedido) => (
+                      <PedidoCard
+                        key={pedido.id}
+                        pedido={pedido}
+                        onUpdateEstado={actualizarEstado}
+                        isUpdating={isUpdating}
+                      />
+                    ))}
+                </div>
+                {pedidos.filter(pedido => pedido.estado === 'Entregado').length === 0 && (
+                  <p className="text-center text-gray-500 py-8">
+                    No hay pedidos entregados
+                  </p>
+                )}
+              </CardContent>
+            )}
           </Card>
         </TabsContent>
 
