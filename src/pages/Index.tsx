@@ -10,7 +10,8 @@ import { MenuProductos } from '@/components/MenuProductos';
 import { CarritoCompras } from '@/components/CarritoCompras';
 import { FiltroFechas } from '@/components/FiltroFechas';
 import { Producto } from '@/types/pedido';
-import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [fechaInicio, setFechaInicio] = useState<string>();
@@ -96,8 +97,23 @@ const Index = () => {
     <div className="container mx-auto p-6 space-y-6">
       
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">Sistema de Pedidos Casino</h1>
+        <div className="flex items-center justify-center space-x-4">
+          <img 
+            src="/placeholder.svg" 
+            alt="Logo Casino" 
+            className="h-16 w-16 object-contain"
+          />
+          <h1 className="text-4xl font-bold">Sistema de Pedidos Casino</h1>
+        </div>
         <p className="text-gray-600">Gestión completa de pedidos para mesas del casino</p>
+        <div className="flex justify-center">
+          <Link to="/admin-productos">
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Administrar Productos</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Estadísticas */}
@@ -155,12 +171,6 @@ const Index = () => {
         </TabsList>
 
         <TabsContent value="pedidos" className="space-y-6">
-          <FiltroFechas
-            onFiltroChange={handleFiltroChange}
-            fechaInicio={fechaInicio}
-            fechaFin={fechaFin}
-          />
-
           <Card>
             <CardHeader>
               <CardTitle>Pedidos Activos</CardTitle>
@@ -185,6 +195,12 @@ const Index = () => {
               )}
             </CardContent>
           </Card>
+
+          <FiltroFechas
+            onFiltroChange={handleFiltroChange}
+            fechaInicio={fechaInicio}
+            fechaFin={fechaFin}
+          />
 
           <Card>
             <CardHeader>
