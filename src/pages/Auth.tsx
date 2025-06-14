@@ -39,7 +39,7 @@ export default function AuthPage() {
       .eq("id", userId)
       .single();
     if (perfil?.rol === "admin") {
-      navigate("/admin-productos", { replace: true });
+      navigate("/admin-pedidos", { replace: true });
     } else {
       navigate("/", { replace: true });
     }
