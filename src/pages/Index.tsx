@@ -4,26 +4,51 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+
+// Intenta importar el logo, si no existe muestra el nombre en texto plano
+let logoSrc: string | undefined;
+try {
+  logoSrc = require("/placeholder.svg").default ?? "/placeholder.svg";
+} catch {
+  logoSrc = undefined;
+}
 
 export default function Index() {
   const [session, setSession] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
+
+  // Si no hay sesión, redirige a /auth
+  useEffect(() => {
+    if (session === null) {
+      navigate("/auth");
+    }
+  }, [session, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="flex items-center justify-between p-6 shadow">
         <div className="flex items-center space-x-3">
-          <img src={logo} alt="Logo" className="h-12 w-12" />
+          {logoSrc ? (
+            <img src={logoSrc} alt="Logo" className="h-12 w-12" />
+          ) : (
+            <span className="h-12 w-12 flex items-center justify-center font-bold text-2xl bg-gray-100 rounded">CE</span>
+          )}
           <span className="text-3xl font-semibold">Casino EATS</span>
         </div>
         <nav className="space-x-2">

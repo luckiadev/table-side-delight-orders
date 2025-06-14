@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { cleanupAuthState } from "@/utils/authCleanup";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -19,17 +19,12 @@ export default function AuthPage() {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) {
-        // Redirige a /admin-productos si es admin, si no a la página principal
-        checkIsAdminAndRedirect(session.user.id);
-      }
+      if (session) checkIsAdminAndRedirect(session.user.id);
     });
 
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session) {
-        checkIsAdminAndRedirect(data.session.user.id);
-      }
+      if (data.session) checkIsAdminAndRedirect(data.session.user.id);
     });
 
     return () => {
@@ -44,29 +39,32 @@ export default function AuthPage() {
       .eq("id", userId)
       .single();
     if (perfil?.rol === "admin") {
-      navigate("/admin-productos");
+      navigate("/admin-productos", { replace: true });
     } else {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch {}
+
     if (mode === "login") {
-      // LOGIN
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       }
     } else {
-      // SIGNUP
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { nombre },
-          emailRedirectTo: `${window.location.origin}/auth` // para confirmar correo
+          emailRedirectTo: `${window.location.origin}/auth`
         },
       });
       if (error) {
