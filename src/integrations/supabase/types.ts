@@ -45,30 +45,6 @@ export type Database = {
         }
         Relationships: []
       }
-      perfiles: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          nombre: string | null
-          rol: string
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id: string
-          nombre?: string | null
-          rol?: string
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          nombre?: string | null
-          rol?: string
-        }
-        Relationships: []
-      }
       productos: {
         Row: {
           categoria: string

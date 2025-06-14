@@ -11,8 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Plus, Package, DollarSign } from 'lucide-react';
 import { useProductos, ProductoDB, NuevoProducto } from '@/hooks/useProductos';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-// Eliminamos la importación de RequireAdmin
-// import { RequireAdmin } from "@/components/RequireAdmin";
 
 const AdminProductos = () => {
   const { productos, isLoading, crearProducto, actualizarProducto, eliminarProducto, isCreating, isUpdating, isDeleting } = useProductos();
@@ -84,7 +82,6 @@ const AdminProductos = () => {
   }
 
   return (
-    // Quitamos <RequireAdmin>
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold flex items-center justify-center space-x-2">
@@ -136,7 +133,6 @@ const AdminProductos = () => {
         </Card>
       </div>
 
-      {/* Botón y diálogo para nuevo producto */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Lista de Productos</h2>
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -302,4 +298,3 @@ const AdminProductos = () => {
 };
 
 export default AdminProductos;
-
