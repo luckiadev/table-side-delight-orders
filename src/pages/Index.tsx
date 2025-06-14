@@ -16,29 +16,39 @@ try {
 }
 
 export default function Index() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
+        setIsLoading(false);
       }
     );
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsLoading(false);
     });
     return () => {
       authListener?.subscription.unsubscribe();
     };
   }, []);
 
-  // Si no hay sesión, redirige a /auth
   useEffect(() => {
-    if (session === null) {
+    if (!isLoading && session === null) {
       navigate("/auth");
     }
-  }, [session, navigate]);
+  }, [session, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-gray-500 text-lg">Cargando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
