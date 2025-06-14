@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import { FiltroFechas } from '@/components/FiltroFechas';
 import { Producto } from '@/types/pedido';
 import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatNumber } from "@/lib/formatNumber";
 
 const Index = () => {
   const [fechaInicio, setFechaInicio] = useState<string>();
@@ -99,9 +99,9 @@ const Index = () => {
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center space-x-4">
           <img 
-            src="/placeholder.svg" 
-            alt="Logo Casino" 
-            className="h-16 w-16 object-contain"
+            src="/lovable-uploads/2f0ddaac-7367-4d4d-9a58-363eb7056a4f.png" 
+            alt="Logo Casino"
+            className="h-16 w-16 object-contain rounded-full bg-white"
           />
           <h1 className="text-4xl font-bold">Sistema de Pedidos Casino</h1>
         </div>
@@ -122,7 +122,7 @@ const Index = () => {
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-gray-600">Pendientes</p>
-              <p className="text-2xl font-bold">{stats.pendientes}</p>
+              <p className="text-2xl font-bold">{formatNumber(stats.pendientes)}</p>
             </div>
             <Clock className="h-8 w-8 text-yellow-500" />
           </CardContent>
@@ -131,7 +131,7 @@ const Index = () => {
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-gray-600">En Preparación</p>
-              <p className="text-2xl font-bold">{stats.enPreparacion}</p>
+              <p className="text-2xl font-bold">{formatNumber(stats.enPreparacion)}</p>
             </div>
             <Package className="h-8 w-8 text-blue-500" />
           </CardContent>
@@ -140,7 +140,7 @@ const Index = () => {
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-gray-600">Preparados</p>
-              <p className="text-2xl font-bold">{stats.preparados}</p>
+              <p className="text-2xl font-bold">{formatNumber(stats.preparados)}</p>
             </div>
             <CheckCircle className="h-8 w-8 text-green-500" />
           </CardContent>
@@ -149,7 +149,7 @@ const Index = () => {
           <CardContent className="flex items-center justify-between p-4">
             <div>
               <p className="text-sm text-gray-600">Entregados</p>
-              <p className="text-2xl font-bold">{stats.entregados}</p>
+              <p className="text-2xl font-bold">{formatNumber(stats.entregados)}</p>
             </div>
             <CheckCircle className="h-8 w-8 text-gray-500" />
           </CardContent>

@@ -1,10 +1,10 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pedido } from '@/types/pedido';
 import { Clock, MapPin, DollarSign } from 'lucide-react';
+import { formatNumber } from "@/lib/formatNumber";
 
 interface PedidoCardProps {
   pedido: Pedido;
@@ -46,7 +46,7 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
                 {producto.quantity}x {producto.name}
               </span>
               <span className="font-medium">
-                ${(producto.price * producto.quantity).toLocaleString()}
+                ${formatNumber(producto.price * producto.quantity)}
               </span>
             </div>
           ))}
@@ -56,7 +56,7 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <DollarSign className="h-4 w-4" />
             <span className="font-bold text-lg">
-              ${pedido.total.toLocaleString()}
+              ${formatNumber(pedido.total)}
             </span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-600">

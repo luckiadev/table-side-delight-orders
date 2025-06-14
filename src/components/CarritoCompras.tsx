@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Producto } from '@/types/pedido';
 import { useState, useEffect } from 'react';
+import { formatNumber } from "@/lib/formatNumber";
 
 interface CarritoComprasProps {
   cart: Producto[];
@@ -74,7 +74,7 @@ export const CarritoCompras = ({
               <div className="flex-1">
                 <div className="font-medium">{item.name}</div>
                 <div className="text-sm text-gray-600">
-                  ${item.price.toLocaleString()} c/u
+                  ${formatNumber(item.price)} c/u
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -103,7 +103,7 @@ export const CarritoCompras = ({
         <div className="space-y-4">
           <div className="flex justify-between items-center font-bold text-lg">
             <span>Total:</span>
-            <span>${total.toLocaleString()}</span>
+            <span>${formatNumber(total)}</span>
           </div>
 
           <div className="space-y-2">

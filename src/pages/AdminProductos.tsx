@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Plus, Package, DollarSign } from 'lucide-react';
 import { useProductos, ProductoDB, NuevoProducto } from '@/hooks/useProductos';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { formatNumber } from "@/lib/formatNumber";
 
 const AdminProductos = () => {
   const { productos, isLoading, crearProducto, actualizarProducto, eliminarProducto, isCreating, isUpdating, isDeleting } = useProductos();
@@ -125,7 +125,7 @@ const AdminProductos = () => {
             <div>
               <p className="text-sm text-gray-600">Precio Promedio</p>
               <p className="text-2xl font-bold">
-                ${productos.length > 0 ? (productos.reduce((sum, p) => sum + p.precio, 0) / productos.length).toFixed(0) : 0}
+                ${productos.length > 0 ? formatNumber(productos.reduce((sum, p) => sum + p.precio, 0) / productos.length) : 0}
               </p>
             </div>
             <DollarSign className="h-8 w-8 text-green-500" />
@@ -255,7 +255,7 @@ const AdminProductos = () => {
                       
                       <div className="flex justify-between items-center">
                         <span className="text-lg font-bold text-green-600">
-                          ${producto.precio.toLocaleString()}
+                          ${formatNumber(producto.precio)}
                         </span>
                         <div className="flex space-x-2">
                           <Button

@@ -1,10 +1,10 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus } from 'lucide-react';
 import { Producto } from '@/types/pedido';
 import { useProductos } from '@/hooks/useProductos';
+import { formatNumber } from "@/lib/formatNumber";
 
 interface MenuProductosProps {
   onAddToCart: (producto: Producto) => void;
@@ -54,7 +54,7 @@ export const MenuProductos = ({ onAddToCart, cart, onUpdateQuantity }: MenuProdu
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{item.nombre}</CardTitle>
-                        <Badge variant="secondary">${item.precio.toLocaleString()}</Badge>
+                        <Badge variant="secondary">${formatNumber(item.precio)}</Badge>
                       </div>
                       {item.descripcion && (
                         <p className="text-sm text-gray-600">{item.descripcion}</p>
