@@ -1,11 +1,9 @@
+
 import { Link } from "react-router-dom";
 import logo from "/placeholder.svg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 
 // Intenta importar el logo, si no existe muestra el nombre en texto plano
 let logoSrc: string | undefined;
@@ -16,40 +14,6 @@ try {
 }
 
 export default function Index() {
-  const [session, setSession] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setIsLoading(false);
-      }
-    );
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && session === null) {
-      navigate("/auth");
-    }
-  }, [session, isLoading, navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-gray-500 text-lg">Cargando...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="flex items-center justify-between p-6 shadow">
@@ -65,15 +29,9 @@ export default function Index() {
           <Link to="/pedidos">
             <Button variant="outline">Realizar Pedido</Button>
           </Link>
-          {session ? (
-            <Link to="/admin-productos">
-              <Button variant="outline">Administrar</Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button variant="outline">Admin Login</Button>
-            </Link>
-          )}
+          <Link to="/admin-productos">
+            <Button variant="outline">Administrar</Button>
+          </Link>
         </nav>
       </header>
       <main className="container mx-auto p-6 flex-grow flex items-center justify-center">
