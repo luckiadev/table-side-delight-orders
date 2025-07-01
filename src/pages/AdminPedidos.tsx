@@ -10,14 +10,16 @@ import { MenuProductos } from '@/components/MenuProductos';
 import { CarritoCompras } from '@/components/CarritoCompras';
 import { FiltroFechas } from '@/components/FiltroFechas';
 import { Producto } from '@/types/pedido';
-import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, Home } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, Home, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatNumber } from "@/lib/formatNumber";
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminPedidos = () => {
   const [fechaInicio, setFechaInicio] = useState<string>();
   const [fechaFin, setFechaFin] = useState<string>();
   const [mostrarEntregados, setMostrarEntregados] = useState(false);
+  const { logout } = useAuth();
   
   const { 
     pedidos, 
@@ -120,6 +122,10 @@ const AdminPedidos = () => {
               <span>Administrar Productos</span>
             </Button>
           </Link>
+          <Button variant="outline" onClick={logout} className="flex items-center space-x-2">
+            <LogOut className="h-4 w-4" />
+            <span>Cerrar Sesión</span>
+          </Button>
         </div>
       </div>
 

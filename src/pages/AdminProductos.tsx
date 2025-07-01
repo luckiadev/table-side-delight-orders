@@ -7,13 +7,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Plus, Package, DollarSign } from 'lucide-react';
+import { Trash2, Edit, Plus, Package, DollarSign, Home, LogOut } from 'lucide-react';
 import { useProductos, ProductoDB, NuevoProducto } from '@/hooks/useProductos';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { formatNumber } from "@/lib/formatNumber";
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const AdminProductos = () => {
   const { productos, isLoading, crearProducto, actualizarProducto, eliminarProducto, isCreating, isUpdating, isDeleting } = useProductos();
+  const { logout } = useAuth();
   
   const [showDialog, setShowDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductoDB | null>(null);
@@ -89,6 +92,24 @@ const AdminProductos = () => {
           <span>Administración de Productos</span>
         </h1>
         <p className="text-gray-600">Gestiona el menú de productos del casino</p>
+        <div className="flex justify-center space-x-4">
+          <Link to="/">
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Home className="h-4 w-4" />
+              <span>Inicio</span>
+            </Button>
+          </Link>
+          <Link to="/admin_pedidos">
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Package className="h-4 w-4" />
+              <span>Administrar Pedidos</span>
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={logout} className="flex items-center space-x-2">
+            <LogOut className="h-4 w-4" />
+            <span>Cerrar Sesión</span>
+          </Button>
+        </div>
       </div>
 
       {/* Estadísticas */}

@@ -25,7 +25,7 @@ const Landing = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/admin_pedidos">
+          <Link to="/login">
             <Button size="lg" className="flex items-center space-x-2 min-w-48">
               <Settings className="h-5 w-5" />
               <span>Administrar Pedidos</span>
