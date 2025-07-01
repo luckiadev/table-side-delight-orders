@@ -24,7 +24,7 @@ const AdminProductos = () => {
     nombre: '',
     descripcion: '',
     precio: 0,
-    categoria: 'Bebidas',
+    categoria: 'bebestibles',
     disponible: true,
     imagen_url: ''
   });
@@ -34,7 +34,7 @@ const AdminProductos = () => {
       nombre: '',
       descripcion: '',
       precio: 0,
-      categoria: 'Bebidas',
+      categoria: 'bebestibles',
       disponible: true,
       imagen_url: ''
     });
@@ -209,12 +209,8 @@ const AdminProductos = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Bebidas">Bebidas</SelectItem>
-                    <SelectItem value="Comida">Comida</SelectItem>
-                    <SelectItem value="Hamburguesas">Hamburguesas</SelectItem>
-                    <SelectItem value="Pizzas">Pizzas</SelectItem>
-                    <SelectItem value="Ensaladas">Ensaladas</SelectItem>
-                    <SelectItem value="Acompañamientos">Acompañamientos</SelectItem>
+                    <SelectItem value="bebestibles">Bebestibles</SelectItem>
+                    <SelectItem value="alimentos">Alimentos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
