@@ -10,7 +10,7 @@ import { CarritoCompras } from '@/components/CarritoCompras';
 import { FiltroFechas } from '@/components/FiltroFechas';
 import { NavigationHeader } from '@/components/NavigationHeader';
 import { Producto } from '@/types/pedido';
-import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, TrendingUp } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatNumber } from "@/lib/formatNumber";
 import { useBreakpoint } from '@/hooks/use-mobile';
 
@@ -18,6 +18,7 @@ const AdminPedidos = () => {
   const [fechaInicio, setFechaInicio] = useState<string>();
   const [fechaFin, setFechaFin] = useState<string>();
   const [mostrarEntregados, setMostrarEntregados] = useState(false);
+  const [historialExpandido, setHistorialExpandido] = useState(false);
   const { isMobile, isTablet } = useBreakpoint();
   
   const { 
@@ -91,6 +92,35 @@ const AdminPedidos = () => {
   const stats = getEstadisticas();
   const pedidosActivos = pedidos.filter(pedido => pedido.estado !== 'Entregado');
   const pedidosEntregados = pedidos.filter(pedido => pedido.estado === 'Entregado');
+
+  // ✅ LÓGICA DE PAGINACIÓN INTELIGENTE - SIN LÍMITES ARTIFICIALES
+  const getHistorialItems = () => {
+    if (!mostrarEntregados) return [];
+    
+    // ✅ MOBILE: Mostrar inicialmente menos, pero expandir muestra TODOS
+    if (isMobile) {
+      const initialCount = 8;
+      
+      if (!historialExpandido) {
+        return pedidosEntregados.slice(0, initialCount);
+      } else {
+        return pedidosEntregados; // ← TODOS los pedidos
+      }
+    }
+    
+    // ✅ DESKTOP: Mostrar más inicialmente, pero expandir muestra TODOS
+    const initialCount = 15;
+    
+    if (!historialExpandido) {
+      return pedidosEntregados.slice(0, initialCount);
+    } else {
+      return pedidosEntregados; // ← TODOS los pedidos
+    }
+  };
+
+  const historialItems = getHistorialItems();
+  const hasMoreItems = mostrarEntregados && historialItems.length < pedidosEntregados.length;
+  const remainingItems = pedidosEntregados.length - historialItems.length;
 
   // Configuración de grid para estadísticas
   const getStatsGridCols = () => {
@@ -294,7 +324,7 @@ const AdminPedidos = () => {
             fechaFin={fechaFin}
           />
 
-          {/* Historial */}
+          {/* ✅ HISTORIAL MEJORADO CON PAGINACIÓN */}
           <Card className="shadow-lg">
             <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
@@ -326,17 +356,42 @@ const AdminPedidos = () => {
             {mostrarEntregados && (
               <CardContent className="p-6">
                 <div className={`grid ${getPedidosGridCols()} gap-4`}>
-                  {pedidosEntregados
-                    .slice(0, isMobile ? 6 : 12)
-                    .map((pedido) => (
-                      <PedidoCard
-                        key={pedido.id}
-                        pedido={pedido}
-                        onUpdateEstado={actualizarEstado}
-                        isUpdating={isUpdating}
-                      />
-                    ))}
+                  {historialItems.map((pedido) => (
+                    <PedidoCard
+                      key={pedido.id}
+                      pedido={pedido}
+                      onUpdateEstado={actualizarEstado}
+                      isUpdating={isUpdating}
+                    />
+                  ))}
                 </div>
+                
+                {/* ✅ BOTÓN "VER MÁS" INTELIGENTE */}
+                {hasMoreItems && (
+                  <div className="text-center mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => setHistorialExpandido(!historialExpandido)}
+                      className="flex items-center space-x-2 hover:shadow-md transition-all"
+                    >
+                      {historialExpandido ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          <span>Ver menos</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          <span>
+                            Ver {remainingItems} más 
+                            {isMobile ? '' : ` (${remainingItems} restantes)`}
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+                
                 {pedidosEntregados.length === 0 && (
                   <div className="text-center py-12">
                     <CheckCircle className="h-16 w-16 mx-auto text-gray-300 mb-4" />

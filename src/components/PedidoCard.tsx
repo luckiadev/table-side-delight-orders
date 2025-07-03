@@ -62,16 +62,49 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
     });
   };
 
-  const getTimeAgo = (dateString: string) => {
+  // ✅ NUEVA FUNCIÓN: Relativo Inteligente
+  const getSmartTimeDisplay = (dateString: string) => {
     const now = new Date();
     const orderTime = new Date(dateString);
-    const diffMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
     
-    if (diffMinutes < 1) return 'Hace menos de 1 min';
-    if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
+    // ✅ Obtener fechas sin tiempo para comparar días
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const orderDate = new Date(orderTime.getFullYear(), orderTime.getMonth(), orderTime.getDate());
     
-    const diffHours = Math.floor(diffMinutes / 60);
-    return `Hace ${diffHours}h ${diffMinutes % 60}min`;
+    // ✅ Formatear hora
+    const timeString = orderTime.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false
+    });
+    
+    // ✅ Lógica inteligente
+    if (orderDate.getTime() === today.getTime()) {
+      // ✅ HOY: Mostrar tiempo relativo si es reciente, sino hora exacta
+      const diffMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
+      
+      if (diffMinutes < 1) return 'Hace menos de 1 min';
+      if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
+      if (diffMinutes < 120) return `Hace ${Math.floor(diffMinutes / 60)}h ${diffMinutes % 60}min`;
+      
+      // ✅ Si hace más de 2 horas hoy, mostrar "Hoy + hora"
+      return `Hoy ${timeString}`;
+      
+    } else if (orderDate.getTime() === yesterday.getTime()) {
+      // ✅ AYER: Siempre mostrar "Ayer + hora"
+      return `Ayer ${timeString}`;
+      
+    } else {
+      // ✅ DÍAS ANTERIORES: Mostrar fecha + hora
+      const dateString = orderTime.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      return `${dateString} ${timeString}`;
+    }
   };
 
   return (
@@ -91,16 +124,22 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
           </Badge>
         </div>
         
-        {/* Información de tiempo */}
+        {/* ✅ INFORMACIÓN DE TIEMPO MEJORADA */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
           <div className="flex items-center space-x-1">
             <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>{formatTime(pedido.fecha_pedido)}</span>
+            <span className="font-medium">
+              {getSmartTimeDisplay(pedido.fecha_pedido)}
+            </span>
           </div>
           
-          <div className="text-xs text-gray-500">
-            {getTimeAgo(pedido.fecha_pedido)}
-          </div>
+          {/* ✅ HORA EXACTA COMO REFERENCIA (solo en desktop si no es hoy) */}
+          {!isMobile && !getSmartTimeDisplay(pedido.fecha_pedido).startsWith('Hoy') && 
+           !getSmartTimeDisplay(pedido.fecha_pedido).includes('min') && (
+            <div className="text-xs text-gray-400">
+              {formatTime(pedido.fecha_pedido)}
+            </div>
+          )}
         </div>
       </CardHeader>
       
