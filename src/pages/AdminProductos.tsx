@@ -21,8 +21,32 @@ import {
   Eye,
   EyeOff,
   Save,
-  X
+  X,
+  Utensils,
+  Coffee
 } from 'lucide-react';
+
+// ✅ CATEGORÍAS PERMITIDAS - Solo Alimentos y Bebidas
+const CATEGORIAS_PERMITIDAS = ['alimentos', 'bebidas'] as const;
+type CategoriaPermitida = typeof CATEGORIAS_PERMITIDAS[number];
+
+// ✅ Mapeo de categorías a iconos y estilos
+const CATEGORIA_CONFIG = {
+  alimentos: {
+    label: 'Alimentos',
+    icon: Utensils,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
+    borderColor: 'border-orange-200'
+  },
+  bebidas: {
+    label: 'Bebidas', 
+    icon: Coffee,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    borderColor: 'border-blue-200'
+  }
+} as const;
 
 const AdminProductos = () => {
   const { isMobile } = useBreakpoint();
@@ -36,19 +60,34 @@ const AdminProductos = () => {
     nombre: '',
     descripcion: '',
     precio: '',
-    categoria: '',
+    categoria: '' as CategoriaPermitida | '',
     disponible: true
   });
 
-  const productosDisponibles = productos.filter(p => p.disponible);
-  const productosNoDisponibles = productos.filter(p => !p.disponible);
-  const categorias = [...new Set(productos.map(p => p.categoria))];
-  const precioPromedio = productos.length > 0 
-    ? productos.reduce((sum, p) => sum + p.precio, 0) / productos.length 
+  // ✅ FILTRAR SOLO PRODUCTOS DE CATEGORÍAS PERMITIDAS
+  const productosPermitidos = productos.filter(p => 
+    CATEGORIAS_PERMITIDAS.includes(p.categoria as CategoriaPermitida)
+  );
+  
+  const productosDisponibles = productosPermitidos.filter(p => p.disponible);
+  const productosNoDisponibles = productosPermitidos.filter(p => !p.disponible);
+  
+  // ✅ CATEGORÍAS FILTRADAS - Solo las permitidas
+  const categoriasUsadas = [...new Set(productosPermitidos.map(p => p.categoria))]
+    .filter(cat => CATEGORIAS_PERMITIDAS.includes(cat as CategoriaPermitida));
+  
+  const precioPromedio = productosPermitidos.length > 0 
+    ? productosPermitidos.reduce((sum, p) => sum + p.precio, 0) / productosPermitidos.length 
     : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // ✅ VALIDAR QUE LA CATEGORÍA SEA PERMITIDA
+    if (!CATEGORIAS_PERMITIDAS.includes(formData.categoria as CategoriaPermitida)) {
+      alert('Por favor selecciona una categoría válida');
+      return;
+    }
     
     const productData = {
       ...formData,
@@ -132,11 +171,11 @@ const AdminProductos = () => {
       {/* Navigation Header */}
       <NavigationHeader
         title="Administración de Productos"
-        subtitle="Gestiona el menú de productos del casino"
+        subtitle="Gestiona el menú de alimentos y bebidas del casino"
         showAdminControls={true}
       />
 
-      {/* Estadísticas Mejoradas */}
+      {/* ✅ ESTADÍSTICAS MEJORADAS - Solo para categorías permitidas */}
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-4`}>
         <Card className="hover:shadow-lg transition-all duration-200 hover:scale-105 border-l-4 border-l-blue-500">
           <CardContent className="p-4">
@@ -144,7 +183,7 @@ const AdminProductos = () => {
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">Total Productos</p>
                 <p className="text-xl sm:text-2xl font-bold text-blue-600">
-                  {formatNumber(productos.length)}
+                  {formatNumber(productosPermitidos.length)}
                 </p>
                 <p className="text-xs text-blue-600/70 mt-1">En catálogo</p>
               </div>
@@ -176,9 +215,9 @@ const AdminProductos = () => {
               <div>
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">Categorías</p>
                 <p className="text-xl sm:text-2xl font-bold text-purple-600">
-                  {formatNumber(categorias.length)}
+                  {formatNumber(categoriasUsadas.length)}
                 </p>
-                <p className="text-xs text-purple-600/70 mt-1">Diferentes tipos</p>
+                <p className="text-xs text-purple-600/70 mt-1">Solo A&B</p>
               </div>
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" />
             </div>
@@ -205,6 +244,16 @@ const AdminProductos = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
         <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Lista de Productos</h2>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+              <Utensils className="h-3 w-3 mr-1" />
+              Alimentos
+            </Badge>
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              <Coffee className="h-3 w-3 mr-1" />
+              Bebidas
+            </Badge>
+          </div>
           <Button
             onClick={() => setShowUnavailable(!showUnavailable)}
             variant="outline"
@@ -226,7 +275,7 @@ const AdminProductos = () => {
         </Button>
       </div>
 
-      {/* Formulario (Modal en Mobile, Inline en Desktop) */}
+      {/* ✅ FORMULARIO LIMITADO - Solo categorías permitidas */}
       {showForm && (
         <Card className="shadow-xl border-2 border-primary/20">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
@@ -274,16 +323,24 @@ const AdminProductos = () => {
                 <Label htmlFor="categoria">Categoría</Label>
                 <Select 
                   value={formData.categoria} 
-                  onValueChange={(value) => setFormData({...formData, categoria: value})}
+                  onValueChange={(value: CategoriaPermitida) => setFormData({...formData, categoria: value})}
                 >
                   <SelectTrigger className="h-11">
                     <SelectValue placeholder="Selecciona una categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="alimentos">Alimentos</SelectItem>
-                    <SelectItem value="bebidas">Bebidas</SelectItem>
-                    <SelectItem value="postres">Postres</SelectItem>
-                    <SelectItem value="snacks">Snacks</SelectItem>
+                    {CATEGORIAS_PERMITIDAS.map((categoria) => {
+                      const config = CATEGORIA_CONFIG[categoria];
+                      const IconComponent = config.icon;
+                      return (
+                        <SelectItem key={categoria} value={categoria}>
+                          <div className="flex items-center space-x-2">
+                            <IconComponent className={`h-4 w-4 ${config.color}`} />
+                            <span className="capitalize">{config.label}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -322,7 +379,7 @@ const AdminProductos = () => {
         </Card>
       )}
 
-      {/* Lista de Productos Disponibles */}
+      {/* ✅ LISTA DE PRODUCTOS DISPONIBLES - Solo categorías permitidas */}
       <Card className="shadow-lg">
         <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
           <CardTitle className="flex items-center justify-between">
@@ -336,17 +393,25 @@ const AdminProductos = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          {categorias.map(categoria => {
+          {categoriasUsadas.map(categoria => {
             const productosPorCategoria = productosDisponibles.filter(p => p.categoria === categoria);
             if (productosPorCategoria.length === 0) return null;
+            
+            const config = CATEGORIA_CONFIG[categoria as CategoriaPermitida];
+            const IconComponent = config?.icon || Package;
             
             return (
               <div key={categoria} className="mb-8 last:mb-0">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
-                    {categoria}
-                  </h3>
-                  <Badge variant="outline">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${config?.bgColor || 'bg-gray-100'}`}>
+                      <IconComponent className={`h-5 w-5 ${config?.color || 'text-gray-600'}`} />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
+                      {config?.label || categoria}
+                    </h3>
+                  </div>
+                  <Badge variant="outline" className={config?.borderColor}>
                     {productosPorCategoria.length} item{productosPorCategoria.length !== 1 ? 's' : ''}
                   </Badge>
                 </div>
@@ -403,10 +468,25 @@ const AdminProductos = () => {
               </div>
             );
           })}
+          
+          {productosDisponibles.length === 0 && (
+            <div className="text-center py-12">
+              <div className="flex justify-center items-center space-x-4 mb-4">
+                <Utensils className="h-16 w-16 text-orange-300" />
+                <Coffee className="h-16 w-16 text-blue-300" />
+              </div>
+              <p className="text-gray-500 text-base mb-2">
+                No hay productos disponibles
+              </p>
+              <p className="text-gray-400 text-sm">
+                Agrega alimentos y bebidas para empezar
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Productos No Disponibles */}
+      {/* ✅ PRODUCTOS NO DISPONIBLES - Solo categorías permitidas */}
       {showUnavailable && productosNoDisponibles.length > 0 && (
         <Card className="shadow-lg border-orange-200">
           <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100">

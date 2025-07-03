@@ -1,0 +1,193 @@
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                public
+d----          03-07-2025    15:11                src
+d----          03-07-2025    15:11                supabase
+-a---          03-07-2025    15:11            277 .gitignore
+-a---          03-07-2025    15:11         198351 bun.lockb
+-a---          03-07-2025    15:11            432 components.json
+-a---          03-07-2025    15:11            818 eslint.config.js
+-a---          03-07-2025    15:11            946 index.html
+-a---          03-07-2025    15:11         265421 package-lock.json
+-a---          03-07-2025    15:11           2820 package.json
+-a---          03-07-2025    15:11             86 postcss.config.js
+-a---          03-07-2025    15:11           2222 README.md
+-a---          03-07-2025    15:11              0 ruta.txt
+-a---          03-07-2025    15:11           2444 tailwind.config.ts
+-a---          03-07-2025    15:11            682 tsconfig.app.json
+-a---          03-07-2025    15:11            400 tsconfig.json
+-a---          03-07-2025    15:11            503 tsconfig.node.json
+-a---          03-07-2025    15:11            493 vite.config.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\public
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                lovable-uploads
+-a---          03-07-2025    15:11           4286 favicon.ico
+-a---          03-07-2025    15:11           3253 placeholder.svg
+-a---          03-07-2025    15:11            174 robots.txt
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\public\lovable-uploads
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11         107539 2f0ddaac-7367-4d4d-9a58-363eb7056a4f.png
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                components
+d----          03-07-2025    15:11                contexts
+d----          03-07-2025    15:11                hooks
+d----          03-07-2025    15:11                integrations
+d----          03-07-2025    15:11                lib
+d----          03-07-2025    15:11                pages
+d----          03-07-2025    15:11                types
+-a---          03-07-2025    15:11            648 App.css
+-a---          03-07-2025    15:11           1675 App.tsx
+-a---          03-07-2025    15:11           2434 index.css
+-a---          03-07-2025    15:11            163 main.tsx
+-a---          03-07-2025    15:11             39 vite-env.d.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\components
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                ui
+-a---          03-07-2025    15:11           7864 CarritoCompras.tsx
+-a---          03-07-2025    15:11           3359 FiltroFechas.tsx
+-a---          03-07-2025    15:11           7941 MenuProductos.tsx
+-a---          03-07-2025    15:11           9322 NavigationHeader.tsx
+-a---          03-07-2025    15:11           8136 PedidoCard.tsx
+-a---          03-07-2025    15:11            419 ProtectedRoute.tsx
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\components\ui
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11           2033 accordion.tsx
+-a---          03-07-2025    15:11           4559 alert-dialog.tsx
+-a---          03-07-2025    15:11           1643 alert.tsx
+-a---          03-07-2025    15:11            145 aspect-ratio.tsx
+-a---          03-07-2025    15:11           1453 avatar.tsx
+-a---          03-07-2025    15:11           1164 badge.tsx
+-a---          03-07-2025    15:11           2816 breadcrumb.tsx
+-a---          03-07-2025    15:11           1957 button.tsx
+-a---          03-07-2025    15:11           2684 calendar.tsx
+-a---          03-07-2025    15:11           1956 card.tsx
+-a---          03-07-2025    15:11           6470 carousel.tsx
+-a---          03-07-2025    15:11          10829 chart.tsx
+-a---          03-07-2025    15:11           1084 checkbox.tsx
+-a---          03-07-2025    15:11            324 collapsible.tsx
+-a---          03-07-2025    15:11           5032 command.tsx
+-a---          03-07-2025    15:11           7444 context-menu.tsx
+-a---          03-07-2025    15:11           3955 dialog.tsx
+-a---          03-07-2025    15:11           3123 drawer.tsx
+-a---          03-07-2025    15:11           7493 dropdown-menu.tsx
+-a---          03-07-2025    15:11           4261 form.tsx
+-a---          03-07-2025    15:11           1211 hover-card.tsx
+-a---          03-07-2025    15:11           2223 input-otp.tsx
+-a---          03-07-2025    15:11            813 input.tsx
+-a---          03-07-2025    15:11            734 label.tsx
+-a---          03-07-2025    15:11           8208 menubar.tsx
+-a---          03-07-2025    15:11           5174 navigation-menu.tsx
+-a---          03-07-2025    15:11           2868 pagination.tsx
+-a---          03-07-2025    15:11           1259 popover.tsx
+-a---          03-07-2025    15:11            803 progress.tsx
+-a---          03-07-2025    15:11           1509 radio-group.tsx
+-a---          03-07-2025    15:11           1752 resizable.tsx
+-a---          03-07-2025    15:11           1688 scroll-area.tsx
+-a---          03-07-2025    15:11           5773 select.tsx
+-a---          03-07-2025    15:11            785 separator.tsx
+-a---          03-07-2025    15:11           4381 sheet.tsx
+-a---          03-07-2025    15:11          24128 sidebar.tsx
+-a---          03-07-2025    15:11            276 skeleton.tsx
+-a---          03-07-2025    15:11           1103 slider.tsx
+-a---          03-07-2025    15:11            923 sonner.tsx
+-a---          03-07-2025    15:11           1166 switch.tsx
+-a---          03-07-2025    15:11           2882 table.tsx
+-a---          03-07-2025    15:11           1936 tabs.tsx
+-a---          03-07-2025    15:11            796 textarea.tsx
+-a---          03-07-2025    15:11           4972 toast.tsx
+-a---          03-07-2025    15:11            805 toaster.tsx
+-a---          03-07-2025    15:11           1798 toggle-group.tsx
+-a---          03-07-2025    15:11           1478 toggle.tsx
+-a---          03-07-2025    15:11           1289 tooltip.tsx
+-a---          03-07-2025    15:11             85 use-toast.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\contexts
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11           1415 AuthContext.tsx
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\hooks
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11           1609 use-mobile.tsx
+-a---          03-07-2025    15:11           4086 use-toast.ts
+-a---          03-07-2025    15:11           4094 usePedidos.ts
+-a---          03-07-2025    15:11           4598 useProductos.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\integrations
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                supabase
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\integrations\supabase
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11            674 client.ts
+-a---          03-07-2025    15:11           6903 types.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\lib
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11            340 formatNumber.ts
+-a---          03-07-2025    15:11            172 utils.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\pages
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11          15969 AdminPedidos.tsx
+-a---          03-07-2025    15:11          19663 AdminProductos.tsx
+-a---          03-07-2025    15:11           3662 ClientesPedidos.tsx
+-a---          03-07-2025    15:11          15992 Index.tsx
+-a---          03-07-2025    15:11           1930 Landing.tsx
+-a---          03-07-2025    15:11           3026 Login.tsx
+-a---          03-07-2025    15:11            766 NotFound.tsx
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\src\types
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11            497 pedido.ts
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\supabase
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          03-07-2025    15:11                migrations
+-a---          03-07-2025    15:11             35 config.toml
+
+    Directory: D:\Proyectos\Pedidos-Luckia\table-side-delight-orders\supabase\migrations
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          03-07-2025    15:11           2663 20250612141743-d2dfdbba-8a9c-4021-a88f-0da4803caf64.sql
+-a---          03-07-2025    15:11            355 20250613173518-f45990d4-a3a6-4cb9-aed3-40461e71e364.sql
+-a---          03-07-2025    15:11           1292 20250613214240-249aa760-d9e0-4fa0-b06c-457f0fc5203c.sql
+-a---          03-07-2025    15:11            938 20250614174931-8795ab59-2455-4427-8baf-22ef7a016142.sql
+-a---          03-07-2025    15:11            389 20250614175426-f214a0b7-cad2-4bf8-acf0-390a02f253c3.sql
+-a---          03-07-2025    15:11            772 20250619120923-45cbed71-1c3f-4e47-81b6-da0b0507ea8a.sql
+
