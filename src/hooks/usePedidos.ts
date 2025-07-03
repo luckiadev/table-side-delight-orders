@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
-import { toast } from '@/hooks/use-toast';
 
 export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   const queryClient = useQueryClient();
@@ -40,7 +39,7 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
     },
   });
 
-  // Crear nuevo pedido
+  // ✅ CREAR NUEVO PEDIDO - SIN TOAST AUTOMÁTICO
   const crearPedidoMutation = useMutation({
     mutationFn: async (nuevoPedido: NuevoPedido) => {
       console.log('Creating pedido:', nuevoPedido);
@@ -64,22 +63,17 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      toast({
-        title: "Pedido creado",
-        description: "El pedido se ha creado exitosamente",
-      });
+      // ✅ TOAST REMOVIDO - Lo manejamos desde el componente
+      console.log('Pedido creado exitosamente - Toast manejado por componente');
     },
     onError: (error) => {
       console.error('Error in crearPedidoMutation:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo crear el pedido",
-        variant: "destructive",
-      });
+      // ✅ SOLO THROW ERROR - El componente maneja el toast de error
+      throw error;
     },
   });
 
-  // Actualizar estado del pedido
+  // ✅ ACTUALIZAR ESTADO DEL PEDIDO - CON TOAST MEJORADO
   const actualizarEstadoMutation = useMutation({
     mutationFn: async ({ id, estado }: { id: string; estado: Pedido['estado'] }) => {
       console.log('Updating pedido estado:', { id, estado });
@@ -104,20 +98,22 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
       console.log('Pedido updated:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      toast({
-        title: "Estado actualizado",
-        description: "El estado del pedido se ha actualizado",
-      });
+      
+      // ✅ TOAST BÁSICO PARA ADMIN (solo console log)
+      console.log('Estado actualizado:', data.estado);
+      
+      // Nota: Si quieres toast para admin también, puedes usar:
+      // toastSeniorFriendly({
+      //   title: "Estado actualizado",
+      //   description: `El pedido cambió a: ${data.estado}`,
+      //   type: 'info'
+      // });
     },
     onError: (error) => {
       console.error('Error in actualizarEstadoMutation:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar el estado del pedido",
-        variant: "destructive",
-      });
+      // Error silencioso para admin - o agregar toast si es necesario
     },
   });
 

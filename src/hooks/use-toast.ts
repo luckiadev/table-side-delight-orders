@@ -6,7 +6,8 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// ✅ DURACIÓN EXTENDIDA PARA SENIORS - 8 segundos para lectura cómoda
+const TOAST_REMOVE_DELAY = 8000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -90,8 +91,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -139,6 +138,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+// ✅ FUNCIÓN TOAST MEJORADA CON PRESETS PARA SENIORS
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -168,6 +168,62 @@ function toast({ ...props }: Toast) {
   }
 }
 
+// ✅ TOAST ESPECIALIZADO PARA PEDIDOS - SÚPER VISIBLE
+function toastPedidoExitoso(mesa: number, total: number) {
+  return toast({
+    title: "✅ ¡PEDIDO ENVIADO EXITOSAMENTE!",
+    description: `Tu pedido para la Mesa ${mesa} ha sido enviado a la cocina. Total: $${total.toLocaleString('es-ES')}`,
+    className: "bg-green-600 text-white border-green-700 shadow-2xl text-lg font-bold",
+    duration: 8000,
+  })
+}
+
+// ✅ TOAST PARA ERRORES - TAMBIÉN VISIBLE
+function toastError(mensaje: string) {
+  return toast({
+    title: "❌ Error al enviar pedido",
+    description: mensaje,
+    className: "bg-red-600 text-white border-red-700 shadow-2xl text-lg font-bold",
+    variant: "destructive",
+    duration: 8000,
+  })
+}
+
+// ✅ TOAST GENÉRICO MEJORADO PARA SENIORS
+function toastSeniorFriendly({ title, description, type = 'success' }: {
+  title: string
+  description: string
+  type?: 'success' | 'error' | 'warning' | 'info'
+}) {
+  const configs = {
+    success: {
+      className: "bg-green-600 text-white border-green-700 shadow-2xl text-lg font-bold",
+      icon: "✅"
+    },
+    error: {
+      className: "bg-red-600 text-white border-red-700 shadow-2xl text-lg font-bold",
+      icon: "❌"
+    },
+    warning: {
+      className: "bg-orange-600 text-white border-orange-700 shadow-2xl text-lg font-bold",
+      icon: "⚠️"
+    },
+    info: {
+      className: "bg-blue-600 text-white border-blue-700 shadow-2xl text-lg font-bold",
+      icon: "ℹ️"
+    }
+  }
+
+  const config = configs[type]
+
+  return toast({
+    title: `${config.icon} ${title}`,
+    description,
+    className: config.className,
+    duration: 8000,
+  })
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -184,8 +240,11 @@ function useToast() {
   return {
     ...state,
     toast,
+    toastPedidoExitoso,  // ✅ Función especializada para pedidos
+    toastError,          // ✅ Función especializada para errores  
+    toastSeniorFriendly, // ✅ Función genérica senior-friendly
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, toast, toastPedidoExitoso, toastError, toastSeniorFriendly }

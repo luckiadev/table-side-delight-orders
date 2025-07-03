@@ -101,3 +101,234 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* =========================================== */
+/* ✅ TOASTS SENIOR-FRIENDLY - SÚPER VISIBLES */
+/* =========================================== */
+
+/* ✅ CONTENEDOR DE TOASTS - POSICIÓN OPTIMIZADA */
+[data-sonner-toaster] {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  max-width: 420px !important;
+  width: 100% !important;
+}
+
+/* ✅ TOAST BASE MEJORADO PARA SENIORS */
+[data-sonner-toast] {
+  min-height: 90px !important;
+  border-radius: 16px !important;
+  border-width: 4px !important;
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+  padding: 20px 24px !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4), 
+    0 10px 20px -5px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ✅ TOAST DE ÉXITO - VERDE SÚPER VISIBLE */
+[data-sonner-toast].bg-green-600 {
+  background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%) !important;
+  border-color: #064e3b !important;
+  color: white !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(5, 150, 105, 0.5), 
+    0 10px 20px -5px rgba(5, 150, 105, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-sonner-toast].bg-green-600 [data-title] {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  margin-bottom: 10px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  letter-spacing: 0.5px !important;
+}
+
+[data-sonner-toast].bg-green-600 [data-description] {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  opacity: 0.98 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  line-height: 1.5 !important;
+}
+
+/* ✅ TOAST DE ERROR - ROJO SÚPER VISIBLE */
+[data-sonner-toast].bg-red-600 {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%) !important;
+  border-color: #7f1d1d !important;
+  color: white !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(220, 38, 38, 0.5), 
+    0 10px 20px -5px rgba(220, 38, 38, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-sonner-toast].bg-red-600 [data-title] {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  margin-bottom: 10px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  letter-spacing: 0.5px !important;
+}
+
+[data-sonner-toast].bg-red-600 [data-description] {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  opacity: 0.98 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  line-height: 1.5 !important;
+}
+
+/* ✅ TOAST DE ADVERTENCIA - NARANJA VISIBLE */
+[data-sonner-toast].bg-orange-600 {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%) !important;
+  border-color: #7c2d12 !important;
+  color: white !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(234, 88, 12, 0.5), 
+    0 10px 20px -5px rgba(234, 88, 12, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ✅ TOAST DE INFORMACIÓN - AZUL VISIBLE */
+[data-sonner-toast].bg-blue-600 {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%) !important;
+  border-color: #1e3a8a !important;
+  color: white !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(37, 99, 235, 0.5), 
+    0 10px 20px -5px rgba(37, 99, 235, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ✅ ANIMACIÓN SÚPER LLAMATIVA PARA SENIORS */
+@keyframes slideInBounce {
+  0% {
+    transform: translateX(120%) scale(0.7) rotate(5deg);
+    opacity: 0;
+  }
+  30% {
+    transform: translateX(-20px) scale(1.05) rotate(-2deg);
+    opacity: 0.7;
+  }
+  60% {
+    transform: translateX(10px) scale(1.02) rotate(1deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ✅ HOVER EFFECT PARA PAUSAR AUTO-DISMISS */
+[data-sonner-toast]:hover {
+  animation-play-state: paused !important;
+  transform: scale(1.03) translateY(-2px) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* ✅ BOTÓN DE CERRAR MÁS VISIBLE Y GRANDE */
+[data-sonner-toast] button[data-close-button] {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 3px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  color: white !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  backdrop-filter: blur(4px) !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-sonner-toast] button[data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: scale(1.15) rotate(90deg) !important;
+}
+
+/* ✅ RESPONSIVE PARA MÓVILES - AÚN MÁS GRANDE */
+@media (max-width: 640px) {
+  [data-sonner-toaster] {
+    top: 15px !important;
+    right: 15px !important;
+    left: 15px !important;
+    max-width: none !important;
+  }
+  
+  [data-sonner-toast] {
+    min-height: 110px !important;
+    font-size: 20px !important;
+    padding: 24px !important;
+    border-radius: 20px !important;
+  }
+  
+  [data-sonner-toast] [data-title] {
+    font-size: 24px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  [data-sonner-toast] [data-description] {
+    font-size: 19px !important;
+    line-height: 1.6 !important;
+  }
+
+  [data-sonner-toast] button[data-close-button] {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 22px !important;
+  }
+}
+
+/* ✅ ANIMACIÓN DE PULSO SUTIL PARA MANTENER ATENCIÓN */
+[data-sonner-toast].bg-green-600::before,
+[data-sonner-toast].bg-red-600::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: inherit;
+  border-radius: inherit;
+  z-index: -1;
+  animation: gentlePulse 3s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.1;
+  }
+}
+
+/* ✅ ACCESIBILIDAD MEJORADA */
+[data-sonner-toast] {
+  outline: none !important;
+}
+
+[data-sonner-toast]:focus-visible {
+  outline: 4px solid rgba(255, 255, 255, 0.6) !important;
+  outline-offset: 2px !important;
+}
+
+/* ✅ MODO OSCURO - SI SE USA */
+.dark [data-sonner-toast] {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.8), 
+    0 10px 20px -5px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+}
