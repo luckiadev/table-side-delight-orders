@@ -61,12 +61,13 @@ const Index = () => {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const handleCreateOrder = (numeroMesa: number) => {
+  const handleCreateOrder = (numeroMesa: number, nota: string) => {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     crearPedido({
       numero_mesa: numeroMesa,
       productos: cart,
-      total
+      total,
+      nota
     });
     setCart([]);
   };

@@ -39,7 +39,7 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
     },
   });
 
-  // ✅ CREAR NUEVO PEDIDO - SIN TOAST AUTOMÁTICO
+  // ✅ CREAR NUEVO PEDIDO - SE AGREGAN NOTAS
   const crearPedidoMutation = useMutation({
     mutationFn: async (nuevoPedido: NuevoPedido) => {
       console.log('Creating pedido:', nuevoPedido);
@@ -48,7 +48,8 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
         .insert([{
           numero_mesa: nuevoPedido.numero_mesa,
           productos: nuevoPedido.productos as any,
-          total: nuevoPedido.total
+          total: nuevoPedido.total,
+          nota: nuevoPedido.nota || ''
         }])
         .select()
         .single();
@@ -63,17 +64,17 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      // ✅ TOAST REMOVIDO - Lo manejamos desde el componente
+      
       console.log('Pedido creado exitosamente - Toast manejado por componente');
     },
     onError: (error) => {
       console.error('Error in crearPedidoMutation:', error);
-      // ✅ SOLO THROW ERROR - El componente maneja el toast de error
+      // SOLO THROW ERROR - El componente maneja el toast de error
       throw error;
     },
   });
 
-  // ✅ ACTUALIZAR ESTADO DEL PEDIDO - CON TOAST MEJORADO
+  // ACTUALIZAR ESTADO DEL PEDIDO
   const actualizarEstadoMutation = useMutation({
     mutationFn: async ({ id, estado }: { id: string; estado: Pedido['estado'] }) => {
       console.log('Updating pedido estado:', { id, estado });

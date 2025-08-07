@@ -16,10 +16,12 @@ export interface Pedido {
   fecha_entregado?: string;
   created_at: string;
   updated_at: string;
+  nota: string;
 }
 
 export interface NuevoPedido {
   numero_mesa: number;
   productos: Producto[];
   total: number;
+  nota: string;
 }

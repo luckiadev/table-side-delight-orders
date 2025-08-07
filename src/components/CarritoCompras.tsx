@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, StickyNote } from 'lucide-react';
 import { Producto } from '@/types/pedido';
 import { useState, useEffect } from 'react';
 import { formatNumber } from "@/lib/formatNumber";
@@ -13,7 +14,7 @@ interface CarritoComprasProps {
   cart: Producto[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemoveItem: (productId: string) => void;
-  onCreateOrder: (numeroMesa: number) => void;
+  onCreateOrder: (numeroMesa: number, nota: string) => void;
   isCreating: boolean;
   numeroMesaInicial?: number;
 }
@@ -27,6 +28,7 @@ export const CarritoCompras = ({
   numeroMesaInicial
 }: CarritoComprasProps) => {
   const [numeroMesa, setNumeroMesa] = useState<number>(numeroMesaInicial || 1);
+  const [nota, setNota] = useState<string>('');
   const { isMobile, isTablet } = useBreakpoint();
 
   useEffect(() => {
@@ -40,7 +42,8 @@ export const CarritoCompras = ({
   const handleCreateOrder = () => {
     if (cart.length === 0) return;
     if (numeroMesa < 0 || numeroMesa > 500) return;
-    onCreateOrder(numeroMesa);
+    onCreateOrder(numeroMesa, nota);
+    setNota('');
   };
 
   if (cart.length === 0) {
@@ -73,7 +76,7 @@ export const CarritoCompras = ({
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-lg sm:text-xl">Carrito</span>
+            <span className="text-lg sm:text-xl">Carrito Test</span>
             <span className="bg-primary text-primary-foreground text-xs sm:text-sm px-2 py-0.5 rounded-full">
               {cart.length}
             </span>
@@ -187,6 +190,27 @@ export const CarritoCompras = ({
             className={`h-10 sm:h-11 text-base ${numeroMesaInicial !== undefined ? "bg-blue-50" : ""}`}
           />
         </div>
+
+        {/* Input para Nota */}
+        <div className="space-y-2">
+          <Label htmlFor="nota" className="text-sm sm:text-base flex items-center space-x-1">
+            <StickyNote className="h-4 w-4 text-blue-600" />
+            <span>Nota del pedido</span>
+            <span className="text-xs text-gray-500 font-normal">(Opcional)</span>
+          </Label>
+          <Textarea
+            id="nota"
+            value={nota}
+            onChange={(e) => setNota(e.target.value)}
+            placeholder="Ej: Mesero Juan, Cliente directo, Mesa VIP, etc..."
+            className="h-20 sm:h-24 resize-none text-sm sm:text-base"
+            maxLength={200}
+          />
+          <div className="text-xs text-gray-400 text-right">
+            {nota.length}/200 caracteres
+          </div>
+        </div>
+
 
         {/* Botón Crear Pedido */}
         <Button

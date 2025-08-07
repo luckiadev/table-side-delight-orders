@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote } from 'lucide-react';
 import { usePedidos } from '@/hooks/usePedidos';
 import { useProductos } from '@/hooks/useProductos';
 import { Producto } from '@/types/pedido';
@@ -19,6 +20,7 @@ const ClientesPedidos = () => {
   const { toastPedidoExitoso, toastError } = useToast(); // ✅ USAR TOAST MEJORADO
   const [cart, setCart] = useState<Producto[]>([]);
   const [cartExpanded, setCartExpanded] = useState(false);
+  const [nota, setNota] = useState<string>('');
   const [searchParams] = useSearchParams();
   
   // ✅ OBTENER MESA DEL QR (sin mostrar selector)
@@ -75,17 +77,19 @@ const ClientesPedidos = () => {
       crearPedido({
         numero_mesa: numeroMesa,
         productos: cart,
-        total
+        total,
+        nota
       });
       
       setCart([]);
       setCartExpanded(false);
+      setNota('');
       
-      // ✅ TOAST SÚPER VISIBLE CON FUNCIÓN ESPECIALIZADA
+      // TOAST SÚPER VISIBLE
       toastPedidoExitoso(numeroMesa, total);
       
     } catch (error) {
-      // ✅ TOAST DE ERROR TAMBIÉN VISIBLE
+      // TOAST DE ERROR TAMBIÉN VISIBLE
       toastError("No se pudo enviar el pedido. Por favor, intenta nuevamente.");
       console.error('Error al crear pedido:', error);
     }
@@ -290,6 +294,24 @@ const ClientesPedidos = () => {
               <p className="text-sm text-gray-600">
                 Mesa {numeroMesa}
               </p>
+              {/* CAMPO DE NOTA */}
+              <div className="text-left space-y-2">
+                <div className="flex items-center space-x-1 text-sm font-medium text-gray-700">
+                  <StickyNote className="h-4 w-4 text-blue-600" />
+                  <span>Nota del pedido (Opcional)</span>
+                </div>
+                <Textarea
+                  value={nota}
+                  onChange={(e) => setNota(e.target.value)}
+                  placeholder="Ej: Mesero Juan, Cliente directo, Mesa VIP, sin hielo, etc..."
+                  className="h-16 resize-none text-sm"
+                  maxLength={200}
+                />
+                <div className="text-xs text-gray-400 text-right">
+                  {nota.length}/200 caracteres
+                </div>
+              </div>
+
             </div>
             
             {/* ✅ BOTÓN ENVÍO SÚPER VISIBLE */}

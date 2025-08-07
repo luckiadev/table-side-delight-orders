@@ -13,6 +13,7 @@ import { Producto } from '@/types/pedido';
 import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatNumber } from "@/lib/formatNumber";
 import { useBreakpoint } from '@/hooks/use-mobile';
+import { Textarea } from '@/components/ui/textarea';
 
 const AdminPedidos = () => {
   const [fechaInicio, setFechaInicio] = useState<string>();
@@ -62,12 +63,13 @@ const AdminPedidos = () => {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const handleCreateOrder = (numeroMesa: number) => {
+  const handleCreateOrder = (numeroMesa: number, nota: nota) => {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     crearPedido({
       numero_mesa: numeroMesa,
       productos: cart,
-      total
+      total,
+      nota
     });
     setCart([]);
   };

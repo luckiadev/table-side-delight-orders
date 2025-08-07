@@ -20,6 +20,7 @@ export type Database = {
           productos: Json
           total: number
           updated_at: string
+          nota: string;
         }
         Insert: {
           created_at?: string
@@ -31,6 +32,7 @@ export type Database = {
           productos: Json
           total: number
           updated_at?: string
+          nota?: string;
         }
         Update: {
           created_at?: string
@@ -42,6 +44,7 @@ export type Database = {
           productos?: Json
           total?: number
           updated_at?: string
+          nota?: string;
         }
         Relationships: []
       }

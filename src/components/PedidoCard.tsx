@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pedido } from '@/types/pedido';
-import { Clock, MapPin, DollarSign, Package, CheckCircle, AlertCircle } from 'lucide-react';
 import { formatNumber } from "@/lib/formatNumber";
 import { useBreakpoint } from '@/hooks/use-mobile';
+import { Clock, MapPin, DollarSign, Package, CheckCircle, AlertCircle, StickyNote } from 'lucide-react';
 
 interface PedidoCardProps {
   pedido: Pedido;
@@ -176,6 +176,34 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
           ))}
         </div>
         
+        {/* Total y Tiempo */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+          <div className="flex items-center space-x-2">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+            <div>
+              <span className="text-xs text-gray-500 block sm:inline sm:mr-2">Total:</span>
+              <span className="font-bold text-lg sm:text-xl text-green-600">
+                ${formatNumber(pedido.total)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+         {/* ← NUEVA SECCIÓN: Mostrar Nota del Pedido */}
+        {pedido.nota && pedido.nota.trim() !== '' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start space-x-2">
+              <StickyNote className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="text-xs font-medium text-blue-800 mb-1">Nota del pedido:</div>
+                <div className="text-sm text-blue-700 break-words">
+                  {pedido.nota}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Total y Tiempo */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-200">
           <div className="flex items-center space-x-2">
