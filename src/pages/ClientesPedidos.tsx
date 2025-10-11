@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,21 +23,26 @@ const ClientesPedidos = () => {
   const [nota, setNota] = useState<string>('');
   const [searchParams] = useSearchParams();
   
-  // ✅ OBTENER MESA DEL QR (sin mostrar selector)
-  const mesaFromUrl = searchParams.get('mesa');
-  const numeroMesa = mesaFromUrl ? parseInt(mesaFromUrl) : 1;
+  // ✅ OBTENER MESA DEL QR (sin mostrar selector) - Memoized
+  const numeroMesa = useMemo(() => {
+    const mesaFromUrl = searchParams.get('mesa');
+    return mesaFromUrl ? parseInt(mesaFromUrl) : 1;
+  }, [searchParams]);
 
-  // ✅ FILTRAR PRODUCTOS DISPONIBLES
-  const productosDisponibles = productos.filter(p => 
-    p.disponible && CATEGORIAS_PERMITIDAS.includes(p.categoria as CategoriaPermitida)
+  // ✅ FILTRAR PRODUCTOS DISPONIBLES - Memoized
+  const productosDisponibles = useMemo(() =>
+    productos.filter(p =>
+      p.disponible && CATEGORIAS_PERMITIDAS.includes(p.categoria as CategoriaPermitida)
+    ),
+    [productos]
   );
 
-  // ✅ FUNCIONES DEL CARRITO
-  const getProductQuantity = (productId: string) => {
+  // ✅ FUNCIONES DEL CARRITO - Memoized to prevent re-renders
+  const getProductQuantity = useCallback((productId: string) => {
     return cart.find(item => item.id === productId)?.quantity || 0;
-  };
+  }, [cart]);
 
-  const handleAddToCart = (producto: any) => {
+  const handleAddToCart = useCallback((producto: any) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === producto.id);
       if (existing) {
@@ -54,9 +59,9 @@ const ClientesPedidos = () => {
         quantity: 1
       }];
     });
-  };
+  }, []);
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       setCart(prev => prev.filter(item => item.id !== productId));
       return;
@@ -66,13 +71,13 @@ const ClientesPedidos = () => {
         item.id === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, []);
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = useCallback(() => {
     if (cart.length === 0) return;
-    
+
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
+
     try {
       crearPedido({
         numero_mesa: numeroMesa,
@@ -80,23 +85,31 @@ const ClientesPedidos = () => {
         total,
         nota
       });
-      
+
       setCart([]);
       setCartExpanded(false);
       setNota('');
-      
+
       // TOAST SÚPER VISIBLE
       toastPedidoExitoso(numeroMesa, total);
-      
+
     } catch (error) {
       // TOAST DE ERROR TAMBIÉN VISIBLE
       toastError("No se pudo enviar el pedido. Por favor, intenta nuevamente.");
       console.error('Error al crear pedido:', error);
     }
-  };
+  }, [cart, numeroMesa, nota, crearPedido, toastPedidoExitoso, toastError]);
 
-  const totalCarrito = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Memoize totals to prevent recalculation on every render
+  const totalCarrito = useMemo(() =>
+    cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+    [cart]
+  );
+
+  const totalItems = useMemo(() =>
+    cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart]
+  );
 
   if (isLoading) {
     return (
@@ -266,7 +279,7 @@ const ClientesPedidos = () => {
                 </div>
                 <p className="text-xs text-gray-500">Mesa {numeroMesa}</p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
-                  👇 Desplázate hacia abajo para enviar
+                  <i className="fi fi-rr-arrow-down mr-2"></i>Desplázate hacia abajo para enviar
                 </p>
               </div>
             </div>
@@ -281,7 +294,7 @@ const ClientesPedidos = () => {
             {/* ✅ RESUMEN VISUAL DEL PEDIDO */}
             <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-xl p-4 text-center">
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                🛒 Resumen de tu Pedido
+                <i className="fi fi-rr-shopping-cart mr-2"></i>Resumen de tu Pedido
               </h3>
               <div className="flex justify-between items-center mb-3">
                 <span className="text-base sm:text-lg font-semibold text-gray-700">

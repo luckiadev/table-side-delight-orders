@@ -171,7 +171,7 @@ const AdminProductos = () => {
       {/* Navigation Header */}
       <NavigationHeader
         title="Administración de Productos"
-        subtitle="Gestiona el menú de alimentos y bebidas del casino"
+        subtitle=""
         showAdminControls={true}
       />
 
@@ -181,11 +181,10 @@ const AdminProductos = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-gray-600 font-medium">Total Productos</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">Total</p>
                 <p className="text-xl sm:text-2xl font-bold text-blue-600">
                   {formatNumber(productosPermitidos.length)}
                 </p>
-                <p className="text-xs text-blue-600/70 mt-1">En catálogo</p>
               </div>
               <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
             </div>
@@ -200,9 +199,6 @@ const AdminProductos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {formatNumber(productosDisponibles.length)}
                 </p>
-                <Badge variant="outline" className="text-xs text-green-600 mt-1">
-                  Activos
-                </Badge>
               </div>
               <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
@@ -217,7 +213,6 @@ const AdminProductos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-purple-600">
                   {formatNumber(categoriasUsadas.length)}
                 </p>
-                <p className="text-xs text-purple-600/70 mt-1">Solo A&B</p>
               </div>
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" />
             </div>
@@ -232,7 +227,6 @@ const AdminProductos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-yellow-600">
                   ${formatNumber(precioPromedio)}
                 </p>
-                <p className="text-xs text-yellow-600/70 mt-1">Por producto</p>
               </div>
               <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
             </div>
@@ -472,14 +466,10 @@ const AdminProductos = () => {
           {productosDisponibles.length === 0 && (
             <div className="text-center py-12">
               <div className="flex justify-center items-center space-x-4 mb-4">
-                <Utensils className="h-16 w-16 text-orange-300" />
-                <Coffee className="h-16 w-16 text-blue-300" />
+                <i className="fi fi-rr-burger-soda text-6xl text-orange-300"></i>
               </div>
-              <p className="text-gray-500 text-base mb-2">
+              <p className="text-gray-500 text-base">
                 No hay productos disponibles
-              </p>
-              <p className="text-gray-400 text-sm">
-                Agrega alimentos y bebidas para empezar
               </p>
             </div>
           )}

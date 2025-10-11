@@ -58,11 +58,12 @@ export const useProductos = () => {
     queryKey: ['productos', 'alimentos-bebidas'],
     queryFn: async () => {
       console.log('Fetching productos (solo alimentos y bebidas)...');
-      
+
       // ✅ FILTRO A NIVEL DE BASE DE DATOS - Más eficiente
+      // Select only needed columns to reduce payload
       const { data, error } = await supabase
         .from('productos')
-        .select('*')
+        .select('id, nombre, descripcion, precio, categoria, disponible, imagen_url, created_at, updated_at')
         .in('categoria', CATEGORIAS_PERMITIDAS) // Solo obtiene categorías permitidas
         .order('categoria, nombre');
 
@@ -72,14 +73,17 @@ export const useProductos = () => {
       }
 
       // ✅ FILTRO ADICIONAL POR SEGURIDAD (en caso de datos inconsistentes)
-      const productosFiltrados = data.filter(producto => 
+      const productosFiltrados = data.filter(producto =>
         esCategoriaPermitida(producto.categoria)
       );
 
       console.log(`Productos fetched: ${productosFiltrados.length} (${productosFiltrados.filter(p => p.categoria === 'alimentos').length} alimentos, ${productosFiltrados.filter(p => p.categoria === 'bebidas').length} bebidas)`);
-      
+
       return productosFiltrados as ProductoDB[];
     },
+    // Products don't change often, keep them cached longer
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   // ✅ CREAR NUEVO PRODUCTO CON VALIDACIÓN DE CATEGORÍA

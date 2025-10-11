@@ -13,7 +13,29 @@ import ClientesPedidos from "./pages/ClientesPedidos";
 import AdminProductos from "./pages/AdminProductos";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Optimized React Query configuration for better performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Data stays fresh for 30 seconds (prevents unnecessary refetches)
+      staleTime: 30 * 1000,
+      // Cache data for 5 minutes
+      gcTime: 5 * 60 * 1000,
+      // Retry failed queries 1 time (reduces unnecessary retries)
+      retry: 1,
+      // Don't refetch on window focus for better UX
+      refetchOnWindowFocus: false,
+      // Don't refetch on mount if data is fresh
+      refetchOnMount: false,
+      // Refetch on reconnect for fresh data after network issues
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      // Retry mutations once on failure
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,7 +33,8 @@ const AdminPedidos = () => {
 
   const [cart, setCart] = useState<Producto[]>([]);
 
-  const handleAddToCart = (producto: Producto) => {
+  // Memoize cart handlers to prevent unnecessary re-renders
+  const handleAddToCart = useCallback((producto: Producto) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === producto.id);
       if (existing) {
@@ -45,11 +46,11 @@ const AdminPedidos = () => {
       }
       return [...prev, producto];
     });
-  };
+  }, []);
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      handleRemoveItem(productId);
+      setCart(prev => prev.filter(item => item.id !== productId));
       return;
     }
     setCart(prev =>
@@ -57,13 +58,13 @@ const AdminPedidos = () => {
         item.id === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, []);
 
-  const handleRemoveItem = (productId: string) => {
+  const handleRemoveItem = useCallback((productId: string) => {
     setCart(prev => prev.filter(item => item.id !== productId));
-  };
+  }, []);
 
-  const handleCreateOrder = (numeroMesa: number, nota: nota) => {
+  const handleCreateOrder = useCallback((numeroMesa: number, nota: string) => {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     crearPedido({
       numero_mesa: numeroMesa,
@@ -72,14 +73,15 @@ const AdminPedidos = () => {
       nota
     });
     setCart([]);
-  };
+  }, [cart, crearPedido]);
 
-  const handleFiltroChange = (inicio?: string, fin?: string) => {
+  const handleFiltroChange = useCallback((inicio?: string, fin?: string) => {
     setFechaInicio(inicio);
     setFechaFin(fin);
-  };
+  }, []);
 
-  const getEstadisticas = () => {
+  // Memoize statistics calculation to prevent recalculation on every render
+  const stats = useMemo(() => {
     const pendientes = pedidos.filter(p => p.estado === 'Pendiente').length;
     const enPreparacion = pedidos.filter(p => p.estado === 'En Preparación').length;
     const preparados = pedidos.filter(p => p.estado === 'Preparado').length;
@@ -89,11 +91,18 @@ const AdminPedidos = () => {
       .reduce((sum, p) => sum + p.total, 0);
 
     return { pendientes, enPreparacion, preparados, entregados, totalVentas };
-  };
+  }, [pedidos]);
 
-  const stats = getEstadisticas();
-  const pedidosActivos = pedidos.filter(pedido => pedido.estado !== 'Entregado');
-  const pedidosEntregados = pedidos.filter(pedido => pedido.estado === 'Entregado');
+  // Memoize filtered pedidos to prevent re-filtering on every render
+  const pedidosActivos = useMemo(() =>
+    pedidos.filter(pedido => pedido.estado !== 'Entregado'),
+    [pedidos]
+  );
+
+  const pedidosEntregados = useMemo(() =>
+    pedidos.filter(pedido => pedido.estado === 'Entregado'),
+    [pedidos]
+  );
 
   // ✅ LÓGICA DE PAGINACIÓN INTELIGENTE - SIN LÍMITES ARTIFICIALES
   const getHistorialItems = () => {
@@ -157,7 +166,7 @@ const AdminPedidos = () => {
       {/* Navigation Header */}
       <NavigationHeader
         title="Administración de Pedidos"
-        subtitle="Panel de control para gestionar pedidos del casino"
+        subtitle=""
         showAdminControls={true}
       />
 
@@ -171,7 +180,6 @@ const AdminPedidos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-yellow-600">
                   {formatNumber(stats.pendientes)}
                 </p>
-                <p className="text-xs text-yellow-600/70 mt-1">Requieren atención</p>
               </div>
               <div className="relative">
                 <Clock className="h-8 w-8 text-yellow-500" />
@@ -191,7 +199,6 @@ const AdminPedidos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-blue-600">
                   {formatNumber(stats.enPreparacion)}
                 </p>
-                <p className="text-xs text-blue-600/70 mt-1">En cocina</p>
               </div>
               <div className="relative">
                 <Package className="h-8 w-8 text-blue-500" />
@@ -211,7 +218,6 @@ const AdminPedidos = () => {
                 <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {formatNumber(stats.preparados)}
                 </p>
-                <p className="text-xs text-green-600/70 mt-1">Listos para entregar</p>
               </div>
               <div className="relative">
                 <CheckCircle className="h-8 w-8 text-green-500" />
@@ -232,9 +238,6 @@ const AdminPedidos = () => {
                 </p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-600">
                   {isMobile ? `$${formatNumber(stats.totalVentas)}` : formatNumber(stats.entregados)}
-                </p>
-                <p className="text-xs text-gray-600/70 mt-1">
-                  {isMobile ? "Total del día" : "Completados"}
                 </p>
               </div>
               <div className="relative">
@@ -308,11 +311,8 @@ const AdminPedidos = () => {
               {pedidosActivos.length === 0 && (
                 <div className="text-center py-12">
                   <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500 text-base mb-2">
+                  <p className="text-gray-500 text-base">
                     No hay pedidos activos
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Los nuevos pedidos aparecerán aquí automáticamente
                   </p>
                 </div>
               )}
@@ -332,7 +332,7 @@ const AdminPedidos = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
                 <CardTitle className="text-lg sm:text-xl flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5" />
-                  <span>Historial de Pedidos Entregados</span>
+                  <span>Historial</span>
                 </CardTitle>
                 <Button
                   variant="outline"

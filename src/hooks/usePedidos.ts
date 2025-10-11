@@ -1,18 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
+import { useMemo } from 'react';
 
 export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   const queryClient = useQueryClient();
 
-  // Obtener todos los pedidos
+  // Memoize query key to prevent unnecessary re-renders
+  const queryKey = useMemo(() => ['pedidos', fechaInicio, fechaFin], [fechaInicio, fechaFin]);
+
+  // Obtener todos los pedidos with optimized query
   const { data: pedidos = [], isLoading, error } = useQuery({
-    queryKey: ['pedidos', fechaInicio, fechaFin],
+    queryKey,
     queryFn: async () => {
       console.log('Fetching pedidos...');
       let query = supabase
         .from('pedidos_casino')
-        .select('*')
+        .select('id, numero_mesa, productos, total, estado, fecha_pedido, fecha_entregado, nota, created_at, updated_at')
         .order('fecha_pedido', { ascending: false });
 
       // Aplicar filtros de fecha si están definidos
@@ -24,19 +28,23 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('Error fetching pedidos:', error);
         throw error;
       }
-      
-      console.log('Pedidos fetched:', data);
+
+      console.log('Pedidos fetched:', data?.length || 0);
       // Convertir los datos de la DB al tipo Pedido
       return data.map(item => ({
         ...item,
         productos: item.productos as unknown as Producto[]
       })) as Pedido[];
     },
+    // Keep data fresh for admin panel
+    staleTime: 10 * 1000, // 10 seconds
+    // Enable automatic refetching for real-time updates
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds
   });
 
   // ✅ CREAR NUEVO PEDIDO - SE AGREGAN NOTAS
