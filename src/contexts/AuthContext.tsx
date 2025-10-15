@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient, isSupabaseConfigured, supabaseConfigError } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -26,6 +26,25 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  if (!isSupabaseConfigured) {
+    console.error(supabaseConfigError?.message);
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-4 bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <h1 className="text-2xl font-semibold text-slate-900">Configuracion incompleta</h1>
+          <p className="text-sm text-slate-600">
+            Para ejecutar la aplicacion necesitas definir <code className="font-mono">VITE_SUPABASE_URL</code> y <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> en tu entorno (por ejemplo, en Vercel).
+          </p>
+          <p className="text-sm text-slate-500">
+            Una vez configuradas las variables de entorno, vuelve a desplegar para continuar.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const supabase = getSupabaseClient();
+
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,3 +120,5 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     </AuthContext.Provider>
   );
 };
+
+

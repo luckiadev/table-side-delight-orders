@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient, isSupabaseConfigured, supabaseConfigError } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export interface ProductoDB {
@@ -51,6 +51,11 @@ export const CATEGORIA_CONFIG = {
 } as const;
 
 export const useProductos = () => {
+  if (!isSupabaseConfigured) {
+    throw supabaseConfigError ?? new Error('Supabase no esta configurado.');
+  }
+
+  const supabase = getSupabaseClient();
   const queryClient = useQueryClient();
 
   // ✅ OBTENER SOLO PRODUCTOS DE CATEGORÍAS PERMITIDAS
@@ -272,3 +277,4 @@ export const useProductos = () => {
     esCategoriaPermitida
   };
 };
+

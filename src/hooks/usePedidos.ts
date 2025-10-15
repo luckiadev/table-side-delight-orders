@@ -1,9 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient, isSupabaseConfigured, supabaseConfigError } from '@/integrations/supabase/client';
 import { Pedido, NuevoPedido, Producto } from '@/types/pedido';
 import { useMemo } from 'react';
 
 export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
+  if (!isSupabaseConfigured) {
+    throw supabaseConfigError ?? new Error('Supabase no esta configurado.');
+  }
+
+  const supabase = getSupabaseClient();
   const queryClient = useQueryClient();
 
   // Memoize query key to prevent unnecessary re-renders
@@ -137,3 +142,4 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
     isUpdating: actualizarEstadoMutation.isPending,
   };
 };
+
