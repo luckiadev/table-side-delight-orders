@@ -1,7 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote } from 'lucide-react';
 import { usePedidos } from '@/hooks/usePedidos';
 import { useProductos } from '@/hooks/useProductos';
@@ -22,12 +24,33 @@ const ClientesPedidos = () => {
   const [cartExpanded, setCartExpanded] = useState(false);
   const [nota, setNota] = useState<string>('');
   const [searchParams] = useSearchParams();
+  const mesaParam = searchParams.get('mesa');
   
-  // ✅ OBTENER MESA DEL QR (sin mostrar selector) - Memoized
-  const numeroMesa = useMemo(() => {
-    const mesaFromUrl = searchParams.get('mesa');
-    return mesaFromUrl ? parseInt(mesaFromUrl) : 1;
-  }, [searchParams]);
+  // ✅ MESA DESDE URL (solo si es valida)
+  const mesaFromUrl = useMemo(() => {
+    if (!mesaParam) return null;
+    const parsed = parseInt(mesaParam, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }, [mesaParam]);
+
+  const [mesaSeleccionada, setMesaSeleccionada] = useState<number | null>(mesaFromUrl);
+
+  useEffect(() => {
+    setMesaSeleccionada(mesaFromUrl);
+  }, [mesaFromUrl, setMesaSeleccionada]);
+
+  const numeroMesa = mesaSeleccionada;
+  const mesaDisponible = typeof numeroMesa === 'number' && numeroMesa > 0;
+  const cartItemCount = cart.length;
+  const mesaAsignadaPorUrl = mesaFromUrl !== null;
+  const mesaDisplayText = mesaDisponible ? `Mesa ${numeroMesa}` : 'Selecciona tu mesa';
+
+  useEffect(() => {
+    if (!mesaDisponible && cartItemCount > 0) {
+      setCart([]);
+      setCartExpanded(false);
+    }
+  }, [mesaDisponible, cartItemCount, setCart, setCartExpanded]);
 
   // ✅ FILTRAR PRODUCTOS DISPONIBLES - Memoized
   const productosDisponibles = useMemo(() =>
@@ -42,7 +65,30 @@ const ClientesPedidos = () => {
     return cart.find(item => item.id === productId)?.quantity || 0;
   }, [cart]);
 
+  const handleMesaManualChange = useCallback((value: string) => {
+    if (mesaAsignadaPorUrl) {
+      return;
+    }
+
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      setMesaSeleccionada(null);
+      return;
+    }
+
+    const parsed = parseInt(trimmed, 10);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      setMesaSeleccionada(parsed);
+    } else {
+      setMesaSeleccionada(null);
+    }
+  }, [mesaAsignadaPorUrl, setMesaSeleccionada]);
+
   const handleAddToCart = useCallback((producto: any) => {
+    if (!mesaDisponible) {
+      toastError("Selecciona tu mesa antes de agregar productos.");
+      return;
+    }
     setCart(prev => {
       const existing = prev.find(item => item.id === producto.id);
       if (existing) {
@@ -59,9 +105,12 @@ const ClientesPedidos = () => {
         quantity: 1
       }];
     });
-  }, []);
+  }, [mesaDisponible, toastError, setCart]);
 
   const handleUpdateQuantity = useCallback((productId: string, quantity: number) => {
+    if (!mesaDisponible) {
+      return;
+    }
     if (quantity <= 0) {
       setCart(prev => prev.filter(item => item.id !== productId));
       return;
@@ -71,10 +120,14 @@ const ClientesPedidos = () => {
         item.id === productId ? { ...item, quantity } : item
       )
     );
-  }, []);
+  }, [mesaDisponible, setCart]);
 
   const handleCreateOrder = useCallback(() => {
     if (cart.length === 0) return;
+    if (!mesaDisponible || numeroMesa == null) {
+      toastError("Selecciona tu mesa antes de enviar el pedido.");
+      return;
+    }
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -98,7 +151,7 @@ const ClientesPedidos = () => {
       toastError("No se pudo enviar el pedido. Por favor, intenta nuevamente.");
       console.error('Error al crear pedido:', error);
     }
-  }, [cart, numeroMesa, nota, crearPedido, toastPedidoExitoso, toastError]);
+  }, [cart, numeroMesa, nota, crearPedido, toastPedidoExitoso, toastError, mesaDisponible, setCart, setCartExpanded, setNota]);
 
   // Memoize totals to prevent recalculation on every render
   const totalCarrito = useMemo(() =>
@@ -131,9 +184,27 @@ const ClientesPedidos = () => {
           <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
             Menú del Casino
           </h1>
-          {/* ✅ INFO DE MESA DISCRETA (solo si viene del QR) */}
-          {mesaFromUrl && (
-            <p className="text-sm sm:text-lg text-gray-600">Mesa {numeroMesa}</p>
+          {/* ✅ INFO/SELECCIÓN DE MESA */}
+          {mesaAsignadaPorUrl ? (
+            <p className="text-sm sm:text-lg text-gray-600">{mesaDisplayText}</p>
+          ) : (
+            <div className="max-w-sm mx-auto mt-4 space-y-3 text-left">
+              <Label htmlFor="mesa-input" className="text-gray-700 font-semibold">
+                Selecciona tu mesa
+              </Label>
+              <Input
+                id="mesa-input"
+                type="number"
+                min={1}
+                value={numeroMesa ?? ''}
+                onChange={(e) => handleMesaManualChange(e.target.value)}
+                placeholder="Ej: 12"
+                className="text-center text-lg font-semibold"
+              />
+              <p className="text-xs sm:text-sm text-gray-500 text-center">
+                Ingresa el número de mesa asignado por el personal antes de agregar productos.
+              </p>
+            </div>
           )}
         </div>
 
@@ -166,6 +237,7 @@ const ClientesPedidos = () => {
                         <Button
                           onClick={() => handleAddToCart(producto)}
                           className="h-12 sm:h-16 px-4 sm:px-8 text-base sm:text-xl font-bold bg-blue-600 hover:bg-blue-700 min-w-[80px] sm:min-w-[120px]"
+                          disabled={!mesaDisponible}
                         >
                           {/* ✅ SOLO ÍCONO EN MOBILE, ÍCONO + TEXTO EN DESKTOP */}
                           <Plus className="h-4 w-4 sm:h-6 sm:w-6 sm:mr-2" />
@@ -176,6 +248,7 @@ const ClientesPedidos = () => {
                           <Button
                             onClick={() => handleUpdateQuantity(producto.id, quantity - 1)}
                             className="h-12 w-12 sm:h-16 sm:w-16 text-base sm:text-xl bg-red-600 hover:bg-red-700 p-0"
+                            disabled={!mesaDisponible}
                           >
                             <Minus className="h-4 w-4 sm:h-6 sm:w-6" />
                           </Button>
@@ -187,6 +260,7 @@ const ClientesPedidos = () => {
                           <Button
                             onClick={() => handleUpdateQuantity(producto.id, quantity + 1)}
                             className="h-12 w-12 sm:h-16 sm:w-16 text-base sm:text-xl bg-green-600 hover:bg-green-700 p-0"
+                            disabled={!mesaDisponible}
                           >
                             <Plus className="h-4 w-4 sm:h-6 sm:w-6" />
                           </Button>
@@ -205,7 +279,7 @@ const ClientesPedidos = () => {
           <div className="text-center py-8 bg-gray-50 border border-gray-200 rounded-lg mx-4 mb-20">
             <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-lg text-gray-500">
-              Selecciona productos para continuar
+              {mesaDisponible ? 'Selecciona productos para continuar' : 'Selecciona tu mesa para comenzar'}
             </p>
           </div>
         )}
@@ -262,6 +336,7 @@ const ClientesPedidos = () => {
                         onClick={() => handleUpdateQuantity(item.id, 0)}
                         variant="ghost"
                         className="h-6 w-6 p-0 hover:bg-red-100 text-red-500"
+                        disabled={!mesaDisponible}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -277,7 +352,7 @@ const ClientesPedidos = () => {
                     ${formatNumber(totalCarrito)}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">Mesa {numeroMesa}</p>
+                <p className="text-xs text-gray-500">{mesaDisplayText}</p>
                 <p className="text-xs text-blue-600 font-medium mt-1">
                   <i className="fi fi-rr-arrow-down mr-2"></i>Desplázate hacia abajo para enviar
                 </p>
@@ -305,7 +380,7 @@ const ClientesPedidos = () => {
                 </span>
               </div>
               <p className="text-sm text-gray-600">
-                Mesa {numeroMesa}
+                {mesaDisplayText}
               </p>
               {/* CAMPO DE NOTA */}
               <div className="text-left space-y-2">
@@ -330,7 +405,7 @@ const ClientesPedidos = () => {
             {/* ✅ BOTÓN ENVÍO SÚPER VISIBLE */}
             <Button
               onClick={handleCreateOrder}
-              disabled={isCreating}
+              disabled={isCreating || !mesaDisponible}
               className="w-full h-16 sm:h-20 text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-xl border-4 border-white transform hover:scale-105 transition-all duration-200"
             >
               {isCreating ? (
@@ -358,3 +433,4 @@ const ClientesPedidos = () => {
 };
 
 export default ClientesPedidos;
+
