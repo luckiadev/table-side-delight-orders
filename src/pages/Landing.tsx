@@ -20,7 +20,7 @@ const Landing = () => {
         </div>
 
         <div className="flex flex-col gap-4 justify-center items-center w-full max-w-md mx-auto px-4">
-          <Link to="/admin_pedidos" className="w-full">
+          <Link to="/login" className="w-full">
             <Button size="lg" className="flex items-center justify-center space-x-3 w-full h-12 sm:h-14">
               <i className="fi fi-rr-settings text-lg"></i>
               <span>Administrar</span>

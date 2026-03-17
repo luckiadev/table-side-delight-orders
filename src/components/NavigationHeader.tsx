@@ -4,13 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import {
   Home,
   Package,
+  Settings,
+  LogOut,
   ChefHat,
+  MoreHorizontal,
   Menu,
   X
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavigationHeaderProps {
   title: string;
@@ -25,6 +29,7 @@ export const NavigationHeader = ({
 }: NavigationHeaderProps) => {
   const { isMobile } = useBreakpoint();
   const location = useLocation();
+  const { logout } = useAuth();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const navigationItems = [
@@ -96,15 +101,15 @@ export const NavigationHeader = ({
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActivePath(item.to);
-            
+
             return (
               <Link
                 key={item.to}
                 to={item.to}
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-md'
                     : 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
                 }`}
               >
@@ -121,7 +126,26 @@ export const NavigationHeader = ({
               </Link>
             );
           })}
-          
+
+          {/* Separator */}
+          <div className="my-4 border-t" />
+
+          {/* Logout */}
+          {showAdminControls && (
+            <button
+              onClick={() => {
+                logout();
+                setShowMobileMenu(false);
+              }}
+              className="flex items-center space-x-3 p-3 rounded-lg w-full text-left hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <div>
+                <div className="font-medium">Cerrar Sesión</div>
+                <div className="text-xs text-red-500">Salir del panel admin</div>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -151,7 +175,17 @@ export const NavigationHeader = ({
           </Link>
         );
       })}
-      
+
+      {showAdminControls && (
+        <Button
+          variant="outline"
+          onClick={logout}
+          className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:shadow-md transition-all duration-200"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Cerrar Sesión</span>
+        </Button>
+      )}
     </div>
   );
 
