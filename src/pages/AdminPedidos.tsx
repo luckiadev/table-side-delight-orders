@@ -13,6 +13,7 @@ import { Producto } from '@/types/pedido';
 import { ShoppingCart, Clock, CheckCircle, Package, Eye, EyeOff, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatNumber } from "@/lib/formatNumber";
 import { useBreakpoint } from '@/hooks/use-mobile';
+import { SuspensionControl } from '@/components/SuspensionControl';
 
 
 const AdminPedidos = () => {
@@ -169,6 +170,9 @@ const AdminPedidos = () => {
         subtitle=""
         showAdminControls={true}
       />
+
+      {/* Control de Suspensión */}
+      <SuspensionControl />
 
       {/* Estadísticas Mejoradas */}
       <div className={`grid ${getStatsGridCols()} gap-3 sm:gap-4`}>

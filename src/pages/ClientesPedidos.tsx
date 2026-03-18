@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote } from 'lucide-react';
+import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote, X } from 'lucide-react';
 import { usePedidos } from '@/hooks/usePedidos';
 import { useProductos } from '@/hooks/useProductos';
+import { useConfiguracion } from '@/hooks/useConfiguracion';
 import { Producto } from '@/types/pedido';
 import { formatNumber } from "@/lib/formatNumber";
 import { useSearchParams } from 'react-router-dom';
@@ -19,6 +20,7 @@ type CategoriaPermitida = typeof CATEGORIAS_PERMITIDAS[number];
 const ClientesPedidos = () => {
   const { productos, isLoading } = useProductos();
   const { crearPedido, isCreating } = usePedidos();
+  const { suspension, isSuspendido, getMotivoSuspension, isLoading: isLoadingSuspension } = useConfiguracion();
   const { toastPedidoExitoso, toastError } = useToast(); // ✅ USAR TOAST MEJORADO
   const [cart, setCart] = useState<Producto[]>([]);
   const [cartExpanded, setCartExpanded] = useState(false);
@@ -164,6 +166,62 @@ const ClientesPedidos = () => {
     [cart]
   );
 
+  // Pantalla de suspensión: bloquea la página si el servicio está suspendido
+  if (!isLoadingSuspension && isSuspendido()) {
+    const motivo = getMotivoSuspension();
+
+    // Formatea datetime-local string a texto legible 24h
+    // Parsea manualmente para evitar problemas de timezone
+    const formatearFecha = (value: string) => {
+      const parts = value.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (parts) {
+        const [, y, mo, d, h, mi] = parts;
+        const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi));
+        return date.toLocaleString('es-CL', {
+          weekday: 'long', day: 'numeric', month: 'long',
+          hour: '2-digit', minute: '2-digit', hour12: false,
+        });
+      }
+      return value;
+    };
+
+    // Título según motivo
+    const titulo = 'Servicio no disponible';
+
+    // Mensaje por defecto según motivo
+    const mensajeDefault = motivo === 'horario_programado'
+      ? 'El servicio de pedidos no está disponible en este momento.'
+      : 'El servicio de pedidos está temporalmente suspendido. Volveremos pronto.';
+
+    // Info de horario para el cliente
+    const infoHorario = motivo === 'horario_programado' && suspension.hasta
+      ? `Volvemos: ${formatearFecha(suspension.hasta)}`
+      : null;
+
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center bg-red-100">
+            <svg className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {titulo}
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600">
+            {suspension.mensaje || mensajeDefault}
+          </p>
+          {infoHorario && (
+            <p className="text-sm text-gray-500">
+              {infoHorario}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -284,145 +342,144 @@ const ClientesPedidos = () => {
           </div>
         )}
 
-        {/* ✅ ESPACIO EXTRA PARA EL BOTÓN FIJO */}
-        {cart.length > 0 && <div className="pb-32"></div>}
+        {/* Espacio para la barra inferior fija */}
+        {cart.length > 0 && <div className="pb-24"></div>}
       </div>
 
-      {/* ✅ CARRITO FLOTANTE - SOLO PARA CONSULTAR (SIN BOTÓN) */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-20 right-4 z-50">
-          {!cartExpanded ? (
-            <Button
-              onClick={() => setCartExpanded(true)}
-              className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg border-4 border-white relative"
-            >
-              <ShoppingCart className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs sm:text-sm font-bold rounded-full h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center border-2 border-white">
-                {totalItems}
-              </div>
-            </Button>
-          ) : (
-            <div className="bg-white border-2 border-gray-300 rounded-xl shadow-xl p-4 w-80 sm:w-96 max-h-80 overflow-hidden">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b">
-                <div className="flex items-center space-x-2">
-                  <ShoppingCart className="h-5 w-5 text-blue-600" />
-                  <span className="font-bold text-gray-900">Mi Pedido ({totalItems})</span>
-                </div>
-                <Button
-                  onClick={() => setCartExpanded(false)}
-                  variant="ghost"
-                  className="h-8 w-8 p-0 hover:bg-gray-100"
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </div>
+      {/* OVERLAY oscuro cuando el panel está expandido */}
+      {cart.length > 0 && cartExpanded && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setCartExpanded(false)}
+        />
+      )}
 
-              <div className="space-y-2 mb-3 max-h-32 overflow-y-auto">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {item.name}
-                      </h4>
-                      <p className="text-xs text-gray-600">
-                        ${formatNumber(item.price)} × {item.quantity}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-bold text-green-600">
-                        ${formatNumber(item.price * item.quantity)}
-                      </span>
-                      <Button
-                        onClick={() => handleUpdateQuantity(item.id, 0)}
-                        variant="ghost"
-                        className="h-6 w-6 p-0 hover:bg-red-100 text-red-500"
-                        disabled={!mesaDisponible}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-gray-900">TOTAL:</span>
-                  <span className="text-xl font-bold text-green-700">
-                    ${formatNumber(totalCarrito)}
-                  </span>
+      {/* BARRA INFERIOR COMPACTA (siempre visible cuando hay items) */}
+      {cart.length > 0 && !cartExpanded && (
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          <button
+            onClick={() => setCartExpanded(true)}
+            className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 shadow-2xl flex items-center justify-between"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <ShoppingCart className="h-6 w-6" />
+                <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
                 </div>
-                <p className="text-xs text-gray-500">{mesaDisplayText}</p>
-                <p className="text-xs text-blue-600 font-medium mt-1">
-                  <i className="fi fi-rr-arrow-down mr-2"></i>Desplázate hacia abajo para enviar
-                </p>
               </div>
+              <span className="text-base sm:text-lg font-semibold">
+                Ver pedido
+              </span>
             </div>
-          )}
+            <div className="flex items-center space-x-2">
+              <span className="text-xl sm:text-2xl font-bold">
+                ${formatNumber(totalCarrito)}
+              </span>
+              <ChevronUp className="h-5 w-5" />
+            </div>
+          </button>
         </div>
       )}
 
-      {/* ✅ BOTÓN ENVÍO GIGANTE - COMPLETAMENTE SEPARADO AL FINAL */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-green-500 shadow-2xl p-4 sm:p-6 z-40">
-          <div className="max-w-md mx-auto space-y-4">
-            {/* ✅ RESUMEN VISUAL DEL PEDIDO */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-xl p-4 text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                <i className="fi fi-rr-shopping-cart mr-2"></i>Resumen de tu Pedido
-              </h3>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-base sm:text-lg font-semibold text-gray-700">
-                  {totalItems} producto{totalItems !== 1 ? 's' : ''}
-                </span>
-                <span className="text-xl sm:text-2xl font-bold text-green-700">
-                  ${formatNumber(totalCarrito)}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">
-                {mesaDisplayText}
-              </p>
-              {/* CAMPO DE NOTA */}
-              <div className="text-left space-y-2">
-                <div className="flex items-center space-x-1 text-sm font-medium text-gray-700">
-                  <StickyNote className="h-4 w-4 text-blue-600" />
-                  <span>Nota del pedido (Opcional)</span>
-                </div>
-                <Textarea
-                  value={nota}
-                  onChange={(e) => setNota(e.target.value)}
-                  placeholder="Ej: Mesero Juan, Cliente directo, Mesa VIP, sin hielo, etc..."
-                  className="h-16 resize-none text-sm"
-                  maxLength={200}
-                />
-                <div className="text-xs text-gray-400 text-right">
-                  {nota.length}/200 caracteres
-                </div>
-              </div>
-
+      {/* PANEL EXPANDIBLE — resumen + nota + enviar */}
+      {cart.length > 0 && cartExpanded && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl border-t-2 border-gray-200 max-h-[85vh] overflow-y-auto">
+          {/* Header del panel */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between rounded-t-2xl">
+            <div className="flex items-center space-x-2">
+              <ShoppingCart className="h-5 w-5 text-green-600" />
+              <span className="text-lg font-bold text-gray-900">
+                Tu Pedido ({totalItems})
+              </span>
             </div>
-            
-            {/* ✅ BOTÓN ENVÍO SÚPER VISIBLE */}
+            <Button
+              onClick={() => setCartExpanded(false)}
+              variant="ghost"
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="p-4 space-y-4">
+            {/* Lista de productos */}
+            <div className="space-y-2">
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-900 truncate">
+                      {item.name}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      ${formatNumber(item.price)} × {item.quantity}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm sm:text-base font-bold text-green-700">
+                      ${formatNumber(item.price * item.quantity)}
+                    </span>
+                    <Button
+                      onClick={() => handleUpdateQuantity(item.id, 0)}
+                      variant="ghost"
+                      className="h-7 w-7 p-0 hover:bg-red-100 text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Total + Mesa */}
+            <div className="flex items-center justify-between py-3 border-t border-b border-gray-200">
+              <div>
+                <p className="text-sm text-gray-500">{mesaDisplayText}</p>
+                <p className="text-xs text-gray-400">{totalItems} producto{totalItems !== 1 ? 's' : ''}</p>
+              </div>
+              <span className="text-2xl font-bold text-green-700">
+                ${formatNumber(totalCarrito)}
+              </span>
+            </div>
+
+            {/* Nota del pedido */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-1 text-sm font-medium text-gray-700">
+                <StickyNote className="h-4 w-4 text-blue-600" />
+                <span>Nota del pedido (Opcional)</span>
+              </div>
+              <Textarea
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                placeholder="Ej: Mesero Juan, Cliente directo, Mesa VIP, sin hielo, etc..."
+                className="h-16 resize-none text-sm"
+                maxLength={200}
+              />
+              <div className="text-xs text-gray-400 text-right">
+                {nota.length}/200 caracteres
+              </div>
+            </div>
+
+            {/* Botón de envío */}
             <Button
               onClick={handleCreateOrder}
               disabled={isCreating || !mesaDisponible}
-              className="w-full h-16 sm:h-20 text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-xl border-4 border-white transform hover:scale-105 transition-all duration-200"
+              className="w-full h-14 sm:h-16 text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
             >
               {isCreating ? (
                 <div className="flex items-center space-x-3">
-                  <div className="h-6 w-6 sm:h-8 sm:w-8 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
-                  <span>Enviando Pedido...</span>
+                  <div className="h-6 w-6 animate-spin rounded-full border-3 border-white border-t-transparent"></div>
+                  <span>Enviando...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-3">
-                  <Send className="h-6 w-6 sm:h-8 sm:w-8" />
-                  <span>ENVIAR PEDIDO AHORA</span>
+                  <Send className="h-5 w-5 sm:h-6 sm:w-6" />
+                  <span>ENVIAR PEDIDO</span>
                 </div>
               )}
             </Button>
-            
-            {/* ✅ INSTRUCCIONES CLARAS */}
-            <p className="text-center text-sm sm:text-base text-gray-600">
+
+            <p className="text-center text-xs sm:text-sm text-gray-500 pb-2">
               Tu pedido será enviado a la cocina inmediatamente
             </p>
           </div>

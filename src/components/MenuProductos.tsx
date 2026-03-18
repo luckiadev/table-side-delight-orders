@@ -174,31 +174,29 @@ export const MenuProductos = ({ onAddToCart, cart, onUpdateQuantity }: MenuProdu
                 const quantity = getProductQuantity(item.id);
                 
                 return (
-                  <Card 
-                    key={item.id} 
-                    className={`hover:shadow-md transition-all duration-200 hover:scale-[1.02] group border ${config?.borderColor || 'border-gray-200'} ${config?.hoverColor || 'hover:bg-gray-50'}/50`}
+                  <Card
+                    key={item.id}
+                    className={`hover:shadow-md transition-all duration-200 hover:scale-[1.02] group border ${config?.borderColor || 'border-gray-200'} ${config?.hoverColor || 'hover:bg-gray-50'}/50 flex flex-col h-full`}
                   >
-                    <CardHeader className="pb-2 sm:pb-3">
-                      <div className="flex flex-col space-y-2 sm:space-y-3">
+                    <CardHeader className="pb-2 sm:pb-3 flex-1">
+                      <div className="flex flex-col space-y-2 sm:space-y-3 h-full">
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-base sm:text-lg leading-tight line-clamp-2 flex-1">
                             {item.nombre}
                           </CardTitle>
-                          <Badge 
+                          <Badge
                             className={`ml-2 ${config?.badgeStyle || 'bg-green-100 text-green-700'} text-sm sm:text-base font-semibold shrink-0 border-0`}
                           >
                             ${formatNumber(item.precio)}
                           </Badge>
                         </div>
-                        
-                        {item.descripcion && (
-                          <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                            {item.descripcion}
-                          </p>
-                        )}
-                        
+
+                        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed min-h-[2.5em]">
+                          {item.descripcion || '\u00A0'}
+                        </p>
+
                         {/* ✅ INDICADOR DE CATEGORÍA EN CADA PRODUCTO */}
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 mt-auto">
                           <IconComponent className={`h-3 w-3 ${config?.color || 'text-gray-500'}`} />
                           <span className={`text-xs font-medium ${config?.color || 'text-gray-500'} capitalize`}>
                             {config?.label || category}
@@ -206,7 +204,7 @@ export const MenuProductos = ({ onAddToCart, cart, onUpdateQuantity }: MenuProdu
                         </div>
                       </div>
                     </CardHeader>
-                    
+
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between">
                         {quantity === 0 ? (
