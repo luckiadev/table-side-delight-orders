@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote, X } from 'lucide-react';
+import { Plus, Minus, ShoppingCart, Send, Trash2, ChevronUp, ChevronDown, StickyNote, X, MapPin, Shield, RotateCw, AlertTriangle } from 'lucide-react';
 import { usePedidos } from '@/hooks/usePedidos';
 import { useProductos } from '@/hooks/useProductos';
 import { useConfiguracion } from '@/hooks/useConfiguracion';
+import { useGeolocation } from '@/hooks/useGeolocation';
 import { Producto } from '@/types/pedido';
 import { formatNumber } from "@/lib/formatNumber";
 import { useSearchParams } from 'react-router-dom';
@@ -21,6 +22,7 @@ const ClientesPedidos = () => {
   const { productos, isLoading } = useProductos();
   const { crearPedido, isCreating } = usePedidos();
   const { suspension, isSuspendido, getMotivoSuspension, isLoading: isLoadingSuspension } = useConfiguracion();
+  const { estado: geoEstado, distancia, intentar: reintentarGeo } = useGeolocation();
   const { toastPedidoExitoso, toastError } = useToast(); // ✅ USAR TOAST MEJORADO
   const [cart, setCart] = useState<Producto[]>([]);
   const [cartExpanded, setCartExpanded] = useState(false);
@@ -165,6 +167,129 @@ const ClientesPedidos = () => {
     cart.reduce((sum, item) => sum + item.quantity, 0),
     [cart]
   );
+
+  // Pantalla de verificación de ubicación
+  if (geoEstado === 'verificando') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center bg-blue-100">
+            <MapPin className="h-10 w-10 text-blue-500 animate-pulse" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Verificando ubicación
+          </h1>
+          <p className="text-lg text-gray-600">
+            Por favor, acepta el permiso de ubicación para continuar.
+          </p>
+          <p className="text-sm text-gray-400">
+            Esto es necesario para verificar que te encuentras en el establecimiento.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (geoEstado === 'permiso_denegado') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center bg-amber-100">
+            <Shield className="h-10 w-10 text-amber-600" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Permiso de ubicación requerido
+          </h1>
+          <p className="text-lg text-gray-600">
+            Para realizar pedidos, necesitamos verificar que te encuentras en el casino.
+          </p>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left space-y-3">
+            <p className="text-sm font-semibold text-amber-800">
+              ¿Cómo habilitar la ubicación?
+            </p>
+            <ol className="text-sm text-amber-700 space-y-2 list-decimal list-inside">
+              <li>Toca el ícono de candado o ajustes en la barra de tu navegador</li>
+              <li>Busca "Ubicación" o "Location"</li>
+              <li>Cambia a "Permitir"</li>
+              <li>Recarga esta página</li>
+            </ol>
+          </div>
+          <p className="text-sm text-gray-500">
+            Tu ubicación se utiliza <strong>exclusivamente</strong> para confirmar que estás en el establecimiento. No se almacena ni se comparte.
+          </p>
+          <Button
+            onClick={reintentarGeo}
+            className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700"
+          >
+            <RotateCw className="h-5 w-5 mr-2" />
+            Intentar nuevamente
+          </Button>
+          <p className="text-xs text-gray-400">
+            Si necesitas ayuda, solicita asistencia a un garzón.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (geoEstado === 'fuera_del_rango') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center bg-red-100">
+            <MapPin className="h-10 w-10 text-red-500" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Fuera del alcance
+          </h1>
+          <p className="text-lg text-gray-600">
+            Este servicio solo está disponible desde el interior del casino.
+          </p>
+          <p className="text-sm text-gray-400">
+            Por seguridad, los pedidos solo pueden realizarse cuando te encuentras en el establecimiento.
+          </p>
+          <Button
+            onClick={reintentarGeo}
+            variant="outline"
+            className="w-full h-12 text-base"
+          >
+            <RotateCw className="h-5 w-5 mr-2" />
+            Verificar de nuevo
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (geoEstado === 'no_soportado' || geoEstado === 'error') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center bg-gray-100">
+            <AlertTriangle className="h-10 w-10 text-gray-500" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            No se pudo verificar tu ubicación
+          </h1>
+          <p className="text-lg text-gray-600">
+            {geoEstado === 'no_soportado'
+              ? 'Tu navegador no soporta geolocalización. Intenta con otro navegador (Chrome o Safari).'
+              : 'Ocurrió un error al obtener tu ubicación. Verifica que el GPS esté activado en tu dispositivo.'}
+          </p>
+          <Button
+            onClick={reintentarGeo}
+            className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700"
+          >
+            <RotateCw className="h-5 w-5 mr-2" />
+            Intentar nuevamente
+          </Button>
+          <p className="text-xs text-gray-400">
+            Si el problema persiste, solicita asistencia a un garzón.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Pantalla de suspensión: bloquea la página si el servicio está suspendido
   if (!isLoadingSuspension && isSuspendido()) {
