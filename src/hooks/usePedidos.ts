@@ -18,7 +18,6 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   const { data: pedidos = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: async () => {
-      console.log('Fetching pedidos...');
       let query = supabase
         .from('pedidos_casino')
         .select('id, numero_mesa, productos, total, estado, fecha_pedido, fecha_entregado, nota, created_at, updated_at')
@@ -34,12 +33,7 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
 
       const { data, error } = await query;
 
-      if (error) {
-        console.error('Error fetching pedidos:', error);
-        throw error;
-      }
-
-      console.log('Pedidos fetched:', data?.length || 0);
+      if (error) throw error;
       // Convertir los datos de la DB al tipo Pedido
       return data.map(item => ({
         ...item,
@@ -55,7 +49,6 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   // ✅ CREAR NUEVO PEDIDO - SE AGREGAN NOTAS
   const crearPedidoMutation = useMutation({
     mutationFn: async (nuevoPedido: NuevoPedido) => {
-      console.log('Creating pedido:', nuevoPedido);
       const { data, error } = await supabase
         .from('pedidos_casino')
         .insert([{
@@ -67,22 +60,13 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error creating pedido:', error);
-        throw error;
-      }
-
-      console.log('Pedido created:', data);
+      if (error) throw error;
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      
-      console.log('Pedido creado exitosamente - Toast manejado por componente');
     },
     onError: (error) => {
-      console.error('Error in crearPedidoMutation:', error);
-      // SOLO THROW ERROR - El componente maneja el toast de error
       throw error;
     },
   });
@@ -90,7 +74,6 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
   // ACTUALIZAR ESTADO DEL PEDIDO
   const actualizarEstadoMutation = useMutation({
     mutationFn: async ({ id, estado }: { id: string; estado: Pedido['estado'] }) => {
-      console.log('Updating pedido estado:', { id, estado });
       const updateData: any = { estado };
       
       if (estado === 'Entregado') {
@@ -104,30 +87,11 @@ export const usePedidos = (fechaInicio?: string, fechaFin?: string) => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error updating pedido:', error);
-        throw error;
-      }
-
-      console.log('Pedido updated:', data);
+      if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      
-      // ✅ TOAST BÁSICO PARA ADMIN (solo console log)
-      console.log('Estado actualizado:', data.estado);
-      
-      // Nota: Si quieres toast para admin también, puedes usar:
-      // toastSeniorFriendly({
-      //   title: "Estado actualizado",
-      //   description: `El pedido cambió a: ${data.estado}`,
-      //   type: 'info'
-      // });
-    },
-    onError: (error) => {
-      console.error('Error in actualizarEstadoMutation:', error);
-      // Error silencioso para admin - o agregar toast si es necesario
     },
   });
 

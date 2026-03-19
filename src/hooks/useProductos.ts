@@ -62,27 +62,17 @@ export const useProductos = () => {
   const { data: productos = [], isLoading, error } = useQuery({
     queryKey: ['productos', 'alimentos-bebidas'],
     queryFn: async () => {
-      console.log('Fetching productos (solo alimentos y bebidas)...');
-
-      // ✅ FILTRO A NIVEL DE BASE DE DATOS - Más eficiente
-      // Select only needed columns to reduce payload
       const { data, error } = await supabase
         .from('productos')
         .select('id, nombre, descripcion, precio, categoria, disponible, imagen_url, created_at, updated_at')
         .in('categoria', CATEGORIAS_PERMITIDAS) // Solo obtiene categorías permitidas
         .order('categoria, nombre');
 
-      if (error) {
-        console.error('Error fetching productos:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // ✅ FILTRO ADICIONAL POR SEGURIDAD (en caso de datos inconsistentes)
       const productosFiltrados = data.filter(producto =>
         esCategoriaPermitida(producto.categoria)
       );
-
-      console.log(`Productos fetched: ${productosFiltrados.length} (${productosFiltrados.filter(p => p.categoria === 'alimentos').length} alimentos, ${productosFiltrados.filter(p => p.categoria === 'bebidas').length} bebidas)`);
 
       return productosFiltrados as ProductoDB[];
     },
@@ -94,8 +84,6 @@ export const useProductos = () => {
   // ✅ CREAR NUEVO PRODUCTO CON VALIDACIÓN DE CATEGORÍA
   const crearProductoMutation = useMutation({
     mutationFn: async (nuevoProducto: NuevoProducto) => {
-      console.log('Creating producto:', nuevoProducto);
-      
       // ✅ VALIDACIÓN DE CATEGORÍA ANTES DE ENVIAR
       if (!esCategoriaPermitida(nuevoProducto.categoria)) {
         throw new Error(`Categoría "${nuevoProducto.categoria}" no está permitida. Solo se permiten: ${CATEGORIAS_PERMITIDAS.join(', ')}`);
@@ -107,12 +95,7 @@ export const useProductos = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error creating producto:', error);
-        throw error;
-      }
-
-      console.log('Producto created:', data);
+      if (error) throw error;
       return data;
     },
     onSuccess: (data) => {
@@ -125,7 +108,6 @@ export const useProductos = () => {
       });
     },
     onError: (error) => {
-      console.error('Error in crearProductoMutation:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo crear el producto",
@@ -137,9 +119,8 @@ export const useProductos = () => {
   // ✅ ACTUALIZAR PRODUCTO CON VALIDACIÓN
   const actualizarProductoMutation = useMutation({
     mutationFn: async ({ id, ...datos }: Partial<ProductoDB> & { id: string }) => {
-      console.log('Updating producto:', { id, datos });
-      
-      // ✅ VALIDACIÓN DE CATEGORÍA SI SE ESTÁ ACTUALIZANDO
+      // Validación de categoría
+
       if (datos.categoria && !esCategoriaPermitida(datos.categoria)) {
         throw new Error(`Categoría "${datos.categoria}" no está permitida. Solo se permiten: ${CATEGORIAS_PERMITIDAS.join(', ')}`);
       }
@@ -151,17 +132,13 @@ export const useProductos = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error updating producto:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Producto updated:', data);
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['productos'] });
-      
+
       const categoriaConfig = CATEGORIA_CONFIG[data.categoria as CategoriaPermitida];
       toast({
         title: "Producto actualizado",
@@ -169,7 +146,6 @@ export const useProductos = () => {
       });
     },
     onError: (error) => {
-      console.error('Error in actualizarProductoMutation:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo actualizar el producto",
@@ -181,7 +157,6 @@ export const useProductos = () => {
   // ✅ ELIMINAR PRODUCTO
   const eliminarProductoMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting producto:', id);
       
       // ✅ OBTENER INFO DEL PRODUCTO ANTES DE ELIMINARLO (para el toast)
       const { data: productoInfo } = await supabase
@@ -195,12 +170,7 @@ export const useProductos = () => {
         .delete()
         .eq('id', id);
 
-      if (error) {
-        console.error('Error deleting producto:', error);
-        throw error;
-      }
-
-      console.log('Producto deleted:', id);
+      if (error) throw error;
       return { id, nombre: productoInfo?.nombre, categoria: productoInfo?.categoria };
     },
     onSuccess: (data) => {
@@ -213,7 +183,6 @@ export const useProductos = () => {
       });
     },
     onError: (error) => {
-      console.error('Error in eliminarProductoMutation:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo eliminar el producto",

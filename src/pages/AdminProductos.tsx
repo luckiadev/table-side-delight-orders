@@ -112,7 +112,7 @@ const AdminProductos = () => {
       setShowForm(false);
       setEditingProduct(null);
     } catch (error) {
-      console.error('Error:', error);
+      // Error manejado por las mutaciones del hook
     }
   };
 

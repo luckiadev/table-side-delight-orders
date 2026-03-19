@@ -23,8 +23,6 @@ const Login = () => {
       await login(email, password);
       navigate('/admin_pedidos');
     } catch (err: any) {
-      console.error('Login error:', err);
-      // Provide user-friendly error messages
       if (err.message?.includes('Invalid login credentials')) {
         setError('Email o contraseña incorrectos');
       } else if (err.message?.includes('Email not confirmed')) {

@@ -146,7 +146,7 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
       <CardContent className="space-y-4">
         {/* Lista de Productos */}
         <div className="space-y-2">
-          {pedido.productos.map((producto, index) => (
+          {(Array.isArray(pedido.productos) ? pedido.productos : []).map((producto, index) => (
             <div 
               key={index} 
               className="flex justify-between items-center text-sm py-2 px-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -176,20 +176,7 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
           ))}
         </div>
         
-        {/* Total y Tiempo */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-          <div className="flex items-center space-x-2">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-            <div>
-              <span className="text-xs text-gray-500 block sm:inline sm:mr-2">Total:</span>
-              <span className="font-bold text-lg sm:text-xl text-green-600">
-                ${formatNumber(pedido.total)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-         {/* ← NUEVA SECCIÓN: Mostrar Nota del Pedido */}
+         {/* Nota del Pedido */}
         {pedido.nota && pedido.nota.trim() !== '' && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-start space-x-2">

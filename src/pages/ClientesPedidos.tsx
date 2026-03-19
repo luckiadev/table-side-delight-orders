@@ -34,7 +34,7 @@ const ClientesPedidos = () => {
   const mesaFromUrl = useMemo(() => {
     if (!mesaParam) return null;
     const parsed = parseInt(mesaParam, 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    return Number.isFinite(parsed) && parsed > 0 && parsed <= 999 ? parsed : null;
   }, [mesaParam]);
 
   const [mesaSeleccionada, setMesaSeleccionada] = useState<number | null>(mesaFromUrl);
@@ -81,7 +81,7 @@ const ClientesPedidos = () => {
     }
 
     const parsed = parseInt(trimmed, 10);
-    if (Number.isFinite(parsed) && parsed > 0) {
+    if (Number.isFinite(parsed) && parsed > 0 && parsed <= 999) {
       setMesaSeleccionada(parsed);
     } else {
       setMesaSeleccionada(null);
@@ -153,7 +153,6 @@ const ClientesPedidos = () => {
     } catch (error) {
       // TOAST DE ERROR TAMBIÉN VISIBLE
       toastError("No se pudo enviar el pedido. Por favor, intenta nuevamente.");
-      console.error('Error al crear pedido:', error);
     }
   }, [cart, numeroMesa, nota, crearPedido, toastPedidoExitoso, toastError, mesaDisponible, setCart, setCartExpanded, setNota]);
 
