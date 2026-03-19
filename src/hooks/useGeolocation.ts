@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 // Coordenadas del Luckia Casino, Arica
 const CASINO_LAT = -18.473375;
 const CASINO_LNG = -70.314600;
-const RADIO_METROS = 200;
+const RADIO_METROS = 100;
 
 export type GeoEstado =
   | 'verificando'        // Pidiendo permiso / obteniendo ubicación
