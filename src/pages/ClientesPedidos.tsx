@@ -9,6 +9,8 @@ import { usePedidos } from '@/hooks/usePedidos';
 import { useProductos } from '@/hooks/useProductos';
 import { useConfiguracion } from '@/hooks/useConfiguracion';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useWebpayCreate } from '@/hooks/useWebpayCreate';
+import WebpayRedirect from '@/components/WebpayRedirect';
 import { Producto } from '@/types/pedido';
 import { formatNumber } from "@/lib/formatNumber";
 import { useSearchParams } from 'react-router-dom';
@@ -18,12 +20,17 @@ import { useToast } from '@/hooks/use-toast';
 const CATEGORIAS_PERMITIDAS = ['alimentos', 'bebidas'] as const;
 type CategoriaPermitida = typeof CATEGORIAS_PERMITIDAS[number];
 
+// ✅ LÍMITE DE CANTIDAD POR PRODUCTO (debe coincidir con el servidor)
+const MAX_QUANTITY_PER_ITEM = 20;
+
 const ClientesPedidos = () => {
   const { productos, isLoading } = useProductos();
   const { crearPedido, isCreating } = usePedidos();
   const { suspension, isSuspendido, getMotivoSuspension, isLoading: isLoadingSuspension } = useConfiguracion();
   const { estado: geoEstado, distancia, intentar: reintentarGeo } = useGeolocation();
   const { toastPedidoExitoso, toastError } = useToast(); // ✅ USAR TOAST MEJORADO
+  const { crearTransaccionAsync, isLoading: isCreatingTx } = useWebpayCreate();
+  const [webpayData, setWebpayData] = useState<{ token: string; url: string } | null>(null);
   const [cart, setCart] = useState<Producto[]>([]);
   const [cartExpanded, setCartExpanded] = useState(false);
   const [nota, setNota] = useState<string>('');
@@ -96,9 +103,10 @@ const ClientesPedidos = () => {
     setCart(prev => {
       const existing = prev.find(item => item.id === producto.id);
       if (existing) {
+        if (existing.quantity >= MAX_QUANTITY_PER_ITEM) return prev;
         return prev.map(item =>
           item.id === producto.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: Math.min(item.quantity + 1, MAX_QUANTITY_PER_ITEM) }
             : item
         );
       }
@@ -119,42 +127,45 @@ const ClientesPedidos = () => {
       setCart(prev => prev.filter(item => item.id !== productId));
       return;
     }
+    const clampedQty = Math.min(quantity, MAX_QUANTITY_PER_ITEM);
     setCart(prev =>
       prev.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId ? { ...item, quantity: clampedQty } : item
       )
     );
   }, [mesaDisponible, setCart]);
 
-  const handleCreateOrder = useCallback(() => {
+  const handleCreateOrder = useCallback(async () => {
     if (cart.length === 0) return;
     if (!mesaDisponible || numeroMesa == null) {
       toastError("Selecciona tu mesa antes de enviar el pedido.");
       return;
     }
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
     try {
-      crearPedido({
+      // Enviar solo IDs y cantidades — el servidor valida precios reales
+      const result = await crearTransaccionAsync({
+        productos: cart.map(item => ({ id: item.id, quantity: item.quantity })),
         numero_mesa: numeroMesa,
-        productos: cart,
-        total,
-        nota
+        nota,
       });
 
-      setCart([]);
-      setCartExpanded(false);
-      setNota('');
+      // Guardar datos VERIFICADOS por el servidor (no los del cliente)
+      sessionStorage.setItem('webpay_cart', JSON.stringify({
+        numero_mesa: numeroMesa,
+        productos: result.productos, // precios verificados server-side
+        total: result.amount,        // total calculado server-side
+        nota,
+      }));
 
-      // TOAST SÚPER VISIBLE
-      toastPedidoExitoso(numeroMesa, total);
+      // Redirigir a Transbank
+      setWebpayData({ token: result.token, url: result.url });
 
     } catch (error) {
-      // TOAST DE ERROR TAMBIÉN VISIBLE
-      toastError("No se pudo enviar el pedido. Por favor, intenta nuevamente.");
+      toastError("No se pudo iniciar el pago. Intenta nuevamente.");
+      sessionStorage.removeItem('webpay_cart');
     }
-  }, [cart, numeroMesa, nota, crearPedido, toastPedidoExitoso, toastError, mesaDisponible, setCart, setCartExpanded, setNota]);
+  }, [cart, numeroMesa, nota, crearTransaccionAsync, toastError, mesaDisponible]);
 
   // Memoize totals to prevent recalculation on every render
   const totalCarrito = useMemo(() =>
@@ -355,6 +366,11 @@ const ClientesPedidos = () => {
         </div>
       </div>
     );
+  }
+
+  // Si ya se creó la transacción Webpay, redirigir a Transbank
+  if (webpayData) {
+    return <WebpayRedirect url={webpayData.url} token={webpayData.token} />;
   }
 
   return (
@@ -584,27 +600,27 @@ const ClientesPedidos = () => {
               </div>
             </div>
 
-            {/* Botón de envío */}
+            {/* Botón de pago */}
             <Button
               onClick={handleCreateOrder}
-              disabled={isCreating || !mesaDisponible}
+              disabled={isCreating || isCreatingTx || !mesaDisponible}
               className="w-full h-14 sm:h-16 text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
             >
-              {isCreating ? (
+              {(isCreating || isCreatingTx) ? (
                 <div className="flex items-center space-x-3">
                   <div className="h-6 w-6 animate-spin rounded-full border-3 border-white border-t-transparent"></div>
-                  <span>Enviando...</span>
+                  <span>Procesando pago...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-3">
                   <Send className="h-5 w-5 sm:h-6 sm:w-6" />
-                  <span>ENVIAR PEDIDO</span>
+                  <span>PAGAR CON WEBPAY</span>
                 </div>
               )}
             </Button>
 
             <p className="text-center text-xs sm:text-sm text-gray-500 pb-2">
-              Tu pedido será enviado a la cocina inmediatamente
+              Serás redirigido a Transbank para completar el pago
             </p>
           </div>
         </div>

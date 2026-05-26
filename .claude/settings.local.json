@@ -4,7 +4,10 @@
       "Bash(npx update-browserslist-db@latest:*)",
       "Bash(npm update:*)",
       "Bash(cat:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(xargs wc:*)",
+      "Bash(grep -E \"VITE_|SECRET|KEY|TOKEN|PASSWORD|CREDENTIAL\" /d/Proyectos/table-side-delight-orders/.env*)",
+      "Bash(find /d/Proyectos/table-side-delight-orders -name deno.json* -o -name *.ts -path */deno/*)"
     ],
     "deny": [],
     "ask": []

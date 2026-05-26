@@ -118,10 +118,18 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
             <span>Mesa {pedido.numero_mesa}</span>
           </CardTitle>
           
-          <Badge className={`${estadoConfig.color} flex items-center space-x-1 text-xs sm:text-sm px-2 sm:px-3 py-1`}>
-            <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>{pedido.estado}</span>
-          </Badge>
+          <div className="flex items-center space-x-2">
+            {pedido.nota?.includes('[PAGADO WEBPAY]') && (
+              <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs px-2 py-0.5">
+                <DollarSign className="h-3 w-3 mr-1" />
+                PAGADO
+              </Badge>
+            )}
+            <Badge className={`${estadoConfig.color} flex items-center space-x-1 text-xs sm:text-sm px-2 sm:px-3 py-1`}>
+              <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>{pedido.estado}</span>
+            </Badge>
+          </div>
         </div>
         
         {/* ✅ INFORMACIÓN DE TIEMPO MEJORADA */}
@@ -176,15 +184,15 @@ export const PedidoCard = ({ pedido, onUpdateEstado, isUpdating }: PedidoCardPro
           ))}
         </div>
         
-         {/* Nota del Pedido */}
-        {pedido.nota && pedido.nota.trim() !== '' && (
+         {/* Nota del Pedido (sin la marca [PAGADO WEBPAY]) */}
+        {pedido.nota && pedido.nota.replace('[PAGADO WEBPAY]', '').trim() !== '' && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-start space-x-2">
               <StickyNote className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
                 <div className="text-xs font-medium text-blue-800 mb-1">Nota del pedido:</div>
                 <div className="text-sm text-blue-700 break-words">
-                  {pedido.nota}
+                  {pedido.nota.replace('[PAGADO WEBPAY]', '').trim()}
                 </div>
               </div>
             </div>

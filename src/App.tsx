@@ -12,6 +12,7 @@ import AdminPedidos from "./pages/AdminPedidos";
 import ClientesPedidos from "./pages/ClientesPedidos";
 import AdminProductos from "./pages/AdminProductos";
 import NotFound from "./pages/NotFound";
+import PagoResultado from "./pages/PagoResultado";
 
 // Optimized React Query configuration for better performance
 const queryClient = new QueryClient({
@@ -53,6 +54,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/pedidos" element={<ClientesPedidos />} />
+            <Route path="/pago/resultado" element={<PagoResultado />} />
             <Route path="/admin-productos" element={
               <ProtectedRoute>
                 <AdminProductos />

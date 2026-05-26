@@ -39,10 +39,21 @@ function calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export const useGeolocation = (): GeoResult => {
-  const [estado, setEstado] = useState<GeoEstado>('verificando');
-  const [distancia, setDistancia] = useState<number | null>(null);
+  // ⚠️ BYPASS TEMPORAL — Geolocalización desactivada para desarrollo local
+  // TODO: Reactivar antes de producción (revertir este bloque)
+  const DEV_BYPASS_GEO = true;
+
+  const [estado, setEstado] = useState<GeoEstado>(DEV_BYPASS_GEO ? 'dentro_del_rango' : 'verificando');
+  const [distancia, setDistancia] = useState<number | null>(DEV_BYPASS_GEO ? 0 : null);
 
   const verificar = useCallback(() => {
+    // ⚠️ BYPASS: Siempre simula estar dentro del rango
+    if (DEV_BYPASS_GEO) {
+      setEstado('dentro_del_rango');
+      setDistancia(0);
+      return;
+    }
+
     if (!navigator.geolocation) {
       setEstado('no_soportado');
       return;
@@ -72,7 +83,7 @@ export const useGeolocation = (): GeoResult => {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 60000, // Cache de 1 minuto
+        maximumAge: 60000,
       }
     );
   }, []);
