@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 const FUNCTIONS_URL = import.meta.env.VITE_WEBPAY_FUNCTIONS_URL
   || 'http://localhost:5678';
 
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
 interface WebpayCreateRequest {
   productos: Array<{ id: string; quantity: number }>;
   numero_mesa: number;
@@ -31,7 +33,10 @@ export const useWebpayCreate = () => {
     mutationFn: async (data: WebpayCreateRequest): Promise<WebpayCreateResponse> => {
       const response = await fetch(`${FUNCTIONS_URL}/webpay-create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify(data),
       });
 
