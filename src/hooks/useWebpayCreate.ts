@@ -1,15 +1,12 @@
 // src/hooks/useWebpayCreate.ts
 // Hook TanStack Query para crear transacciones Webpay
-// Llama a la Edge Function en Supabase cloud (proyecto separado del cliente principal)
+// JWT desactivado en webpay-create (requerido: clientes anónimos + instancia Supabase separada)
+// Seguridad: precios y disponibilidad validados server-side en la Edge Function
 
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 
-// URL del proyecto Supabase cloud donde están desplegadas las Edge Functions
 const FUNCTIONS_URL = import.meta.env.VITE_WEBPAY_FUNCTIONS_URL || '';
-
-// Anon key del proyecto Supabase cloud (distinta a la de Easypanel)
-const FUNCTIONS_ANON_KEY = import.meta.env.VITE_SUPABASE_FUNCTIONS_ANON_KEY || '';
 
 interface WebpayCreateRequest {
   productos: Array<{ id: string; quantity: number }>;
@@ -32,10 +29,7 @@ export const useWebpayCreate = () => {
     mutationFn: async (data: WebpayCreateRequest): Promise<WebpayCreateResponse> => {
       const response = await fetch(`${FUNCTIONS_URL}/webpay-create`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${FUNCTIONS_ANON_KEY}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
