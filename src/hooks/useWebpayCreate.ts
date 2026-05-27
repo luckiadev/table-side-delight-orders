@@ -1,16 +1,10 @@
 // src/hooks/useWebpayCreate.ts
 // Hook TanStack Query para crear transacciones Webpay
-// Llama al servidor Deno local (desarrollo) o Edge Function (producción)
+// Usa supabase.functions.invoke() para incluir el Authorization header automáticamente
 
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-
-// URL del servidor de funciones Webpay
-// En desarrollo: Deno local | En producción: Supabase Edge Functions
-const FUNCTIONS_URL = import.meta.env.VITE_WEBPAY_FUNCTIONS_URL
-  || 'http://localhost:5678';
-
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+import { getSupabaseClient } from '@/integrations/supabase/client';
 
 interface WebpayCreateRequest {
   productos: Array<{ id: string; quantity: number }>;
@@ -28,22 +22,16 @@ interface WebpayCreateResponse {
 
 export const useWebpayCreate = () => {
   const { toastError } = useToast();
+  const supabase = getSupabaseClient();
 
   const mutation = useMutation({
     mutationFn: async (data: WebpayCreateRequest): Promise<WebpayCreateResponse> => {
-      const response = await fetch(`${FUNCTIONS_URL}/webpay-create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify(data),
+      const { data: result, error } = await supabase.functions.invoke('webpay-create', {
+        body: data,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Error ${response.status}`);
+      if (error) {
+        throw new Error(error.message || 'Error al iniciar el pago');
       }
 
       return result as WebpayCreateResponse;
