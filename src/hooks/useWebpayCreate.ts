@@ -1,10 +1,15 @@
 // src/hooks/useWebpayCreate.ts
 // Hook TanStack Query para crear transacciones Webpay
-// Usa supabase.functions.invoke() para incluir el Authorization header automáticamente
+// Llama a la Edge Function en Supabase cloud (proyecto separado del cliente principal)
 
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { getSupabaseClient } from '@/integrations/supabase/client';
+
+// URL del proyecto Supabase cloud donde están desplegadas las Edge Functions
+const FUNCTIONS_URL = import.meta.env.VITE_WEBPAY_FUNCTIONS_URL || '';
+
+// Anon key del proyecto Supabase cloud (distinta a la de Easypanel)
+const FUNCTIONS_ANON_KEY = import.meta.env.VITE_SUPABASE_FUNCTIONS_ANON_KEY || '';
 
 interface WebpayCreateRequest {
   productos: Array<{ id: string; quantity: number }>;
@@ -22,16 +27,22 @@ interface WebpayCreateResponse {
 
 export const useWebpayCreate = () => {
   const { toastError } = useToast();
-  const supabase = getSupabaseClient();
 
   const mutation = useMutation({
     mutationFn: async (data: WebpayCreateRequest): Promise<WebpayCreateResponse> => {
-      const { data: result, error } = await supabase.functions.invoke('webpay-create', {
-        body: data,
+      const response = await fetch(`${FUNCTIONS_URL}/webpay-create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${FUNCTIONS_ANON_KEY}`,
+        },
+        body: JSON.stringify(data),
       });
 
-      if (error) {
-        throw new Error(error.message || 'Error al iniciar el pago');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Error ${response.status}`);
       }
 
       return result as WebpayCreateResponse;
